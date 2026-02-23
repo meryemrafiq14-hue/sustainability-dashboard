@@ -51,8 +51,5 @@ Thumbs.db
 notes.txt
 TODO.txt
 
-# Keep these specific files (if they exist as examples)
-!sdg_lookup.csv
-!Keywords_cleaned.csv
-!SDG_Mappings_cleaned.csv
-!Publications_cleaned.csv
+# No CSV files should be committed (all contain data)
+# Remove any exceptions - all data files are confidential
