@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gies Impact Command Center</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<!-- D3.js for professional geo projection and path rendering -->
+<script src="https://unpkg.com/d3@7/dist/d3.min.js"></script>
+<!-- TopoJSON client for world boundary data -->
+<script src="https://unpkg.com/topojson-client@3/dist/topojson-client.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#f8fafc;-webkit-font-smoothing:antialiased}
+@keyframes sdg-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.sdg-ring{animation:sdg-spin 60s linear infinite;transform-origin:180px 180px}
+.sdg-ring:hover{animation-play-state:paused}
+@keyframes pulse-anim{0%,100%{opacity:1}50%{opacity:.3}}
+.pulse-dot{animation:pulse-anim 2s ease-in-out infinite}
+@keyframes bounce-anim{0%,100%{transform:translateY(-4px)}50%{transform:translateY(0)}}
+.bounce{animation:bounce-anim .8s ease-in-out infinite}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fadein{animation:fadein .3s ease forwards}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+button:focus{outline:none}
+a{text-decoration:none}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.shimmer-line{height:11px;border-radius:6px;margin-bottom:7px;background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite}
+@keyframes viewTransition{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.view-transition{animation:viewTransition .35s ease forwards}
+.tooltip-trigger{position:relative;cursor:help}
+.tooltip-trigger .tooltip-content{display:none;position:absolute;z-index:100;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0a1628;color:white;padding:10px 14px;border-radius:8px;font-size:11px;line-height:1.5;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.tooltip-trigger:hover .tooltip-content{display:block}
+.map-country{transition:fill .18s ease}
+.map-country:hover{fill:#D1D5DB}
+.map-bubble{transition:all .22s ease;cursor:pointer}
+.map-bubble:hover .bubble-outer{opacity:.18}
+.map-bubble:hover .bubble-inner{filter:url(#mapGlow)}
+.map-tooltip{pointer-events:none;opacity:0;transition:opacity .15s ease}
+.map-bubble:hover .map-tooltip{opacity:1}
+@keyframes drawerSlideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes drawerSlideOut{from{transform:translateX(0)}to{transform:translateX(100%)}}
+@keyframes fabPulse{0%,100%{box-shadow:0 4px 20px rgba(99,102,241,.25)}50%{box-shadow:0 4px 28px rgba(99,102,241,.45)}}
+.ai-fab{position:fixed;bottom:28px;right:28px;z-index:900;display:flex;align-items:center;gap:8px;padding:12px 22px;border-radius:50px;border:none;cursor:pointer;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;font-size:13px;font-family:system-ui,-apple-system,sans-serif;box-shadow:0 4px 20px rgba(99,102,241,.3);transition:all .25s ease;letter-spacing:.3px}
+.ai-fab:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.4)}
+.ai-fab:active{transform:translateY(0)}
+.ai-drawer-backdrop{position:fixed;inset:0;z-index:950;background:rgba(15,23,42,.18);backdrop-filter:blur(2px);transition:opacity .25s ease}
+.ai-drawer{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:92vw;z-index:960;background:white;box-shadow:-8px 0 40px rgba(0,0,0,.1);display:flex;flex-direction:column;animation:drawerSlideIn .3s ease forwards}
+.ai-drawer.closing{animation:drawerSlideOut .25s ease forwards}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const{useState,useMemo,useEffect,useCallback,useRef}=React;
+
+// ── INSTITUTIONAL DATA ────────────────────────────────────────
+const YEAR_DATA=[
+  {year:2010,c:17},{year:2011,c:15},{year:2012,c:25},{year:2013,c:30},
+  {year:2014,c:29},{year:2015,c:38},{year:2016,c:43},{year:2017,c:50},
+  {year:2018,c:38},{year:2019,c:65},{year:2020,c:76}
+];
+const DEPT_DATA=[
+  {dept:"Business Admin",c:250,sdgs:[3,8,10,17]},
+  {dept:"Finance",c:121,sdgs:[1,3,13,16]},
+  {dept:"Accountancy",c:34,sdgs:[8,12,16]},
+  {dept:"Gies Affiliates",c:21,sdgs:[10,17]}
+];
+const SDG_COUNTS={1:35,2:6,3:141,4:34,5:27,6:4,7:19,8:87,9:69,10:105,11:18,12:47,13:46,14:0,15:0,16:57,17:67};
+const RESEARCHERS=[
+  {name:"Lough, Benjamin",dept:"Business Admin",count:53,topSdg:17,sdgs:[10,17]},
+  {name:"Fullerton, Don",dept:"Finance",count:35,topSdg:13,sdgs:[13,7]},
+  {name:"Ahsen, Mehmet",dept:"Business Admin",count:29,topSdg:3,sdgs:[3,9]},
+  {name:"Rios, Kimberly",dept:"Gies Affiliates",count:17,topSdg:10,sdgs:[10,5]},
+  {name:"Molitor, David",dept:"Finance",count:13,topSdg:3,sdgs:[3,11]},
+  {name:"Reif, Julian",dept:"Finance",count:13,topSdg:3,sdgs:[3,8]},
+  {name:"Brown, Jeffrey",dept:"Finance",count:12,topSdg:1,sdgs:[1,16]},
+  {name:"Deryugina, Tatyana",dept:"Finance",count:12,topSdg:13,sdgs:[13,11]}
+];
+const KEYWORDS=[
+  {word:"Volunteering",count:53,sdgs:[17,10]},{word:"Environmental Policy",count:37,sdgs:[13,7]},
+  {word:"Artificial Intelligence",count:36,sdgs:[9,3]},{word:"General Equilibrium",count:35,sdgs:[8,10]},
+  {word:"Environmental Tax",count:35,sdgs:[13,12]},{word:"Climate Change",count:28,sdgs:[13,7]},
+  {word:"Health Policy",count:26,sdgs:[3,11]},{word:"Wind Energy",count:25,sdgs:[7,13]},
+  {word:"Inequality",count:24,sdgs:[10,1]},{word:"Carbon Tax",count:22,sdgs:[13,12]},
+  {word:"Public Health",count:20,sdgs:[3,11]},{word:"SDG",count:18,sdgs:[17]},
+  {word:"Corporate Gov.",count:16,sdgs:[16,12]},{word:"Sustainability",count:15,sdgs:[17,12]},
+  {word:"Gene Network",count:14,sdgs:[3,9]},{word:"Multiculturalism",count:13,sdgs:[10,16]}
+];
+const COUNTRY_DATA={
+  USA:{lat:37,lng:-95.7,count:80},China:{lat:35.8,lng:104,count:103},
+  India:{lat:20.6,lng:79,count:94},Brazil:{lat:-14,lng:-52,count:88},
+  Kenya:{lat:-.02,lng:38,count:79},UK:{lat:55.4,lng:-3,count:89},
+  Germany:{lat:51.2,lng:10,count:89},Japan:{lat:36.2,lng:138,count:80},
+  Mexico:{lat:23.6,lng:-103,count:98}
+};
+const COLLAB_PAIRS={
+  "Business Admin":[
+    {pair:"Lough, Benjamin + Rios, Kimberly",sdgs:"SDG 17+10",outcome:"International volunteering and inequality reduction frameworks",score:89,
+      themes:["International Development","Social Equity"],sharedSdgs:[10,17],impactPotential:"High — combined 70 papers across underserved SDGs"},
+    {pair:"Ahsen, Mehmet + Reif, Julian",sdgs:"SDG 3",outcome:"AI-driven public health policy optimization",score:82,
+      themes:["AI in Healthcare","Health Economics"],sharedSdgs:[3],impactPotential:"Medium — strong methodological overlap"}
+  ],
+  "Finance":[
+    {pair:"Fullerton, Don + Deryugina, Tatyana",sdgs:"SDG 13",outcome:"Carbon pricing and environmental tax policy reform",score:94,
+      themes:["Environmental Economics","Climate Policy"],sharedSdgs:[13,11],impactPotential:"Very High — 47 combined papers, direct policy relevance"},
+    {pair:"Brown, Jeffrey + Molitor, David",sdgs:"SDG 1+3",outcome:"Retirement security and public health financing",score:87,
+      themes:["Public Finance","Health Policy"],sharedSdgs:[1,3],impactPotential:"High — bridges poverty and health economics"}
+  ],
+  "Accountancy":[
+    {pair:"Accountancy + Finance Faculty",sdgs:"SDG 8+12",outcome:"Sustainable corporate governance and ESG reporting",score:78,
+      themes:["Corporate Governance","ESG Reporting"],sharedSdgs:[8,12,16],impactPotential:"Medium — emerging interdisciplinary area"}
+  ],
+  "Gies Affiliates":[
+    {pair:"Rios, Kimberly + Lough, Benjamin",sdgs:"SDG 10+17",outcome:"Cross-cultural equity and global partnership frameworks",score:85,
+      themes:["Cultural Psychology","Global Partnerships"],sharedSdgs:[10,17],impactPotential:"High — unique cross-unit collaboration potential"}
+  ]
+};
+const SDG_META={
+  1:{color:"#E5243B",name:"No Poverty"},2:{color:"#DDA63A",name:"Zero Hunger"},
+  3:{color:"#4C9F38",name:"Good Health"},4:{color:"#C5192D",name:"Quality Education"},
+  5:{color:"#FF3A21",name:"Gender Equality"},6:{color:"#26BDE2",name:"Clean Water"},
+  7:{color:"#FCC30B",name:"Affordable Energy"},8:{color:"#A21942",name:"Decent Work"},
+  9:{color:"#FD6925",name:"Industry & Innovation"},10:{color:"#DD1367",name:"Reduced Inequalities"},
+  11:{color:"#FD9D24",name:"Sustainable Cities"},12:{color:"#BF8B2E",name:"Consumption"},
+  13:{color:"#3F7E44",name:"Climate Action"},14:{color:"#0A97D9",name:"Life Below Water"},
+  15:{color:"#56C02B",name:"Life on Land"},16:{color:"#00689D",name:"Peace & Justice"},
+  17:{color:"#19486A",name:"Partnerships"}
+};
+
+const GLOBAL_SDG_SHARE={
+  1:4.2, 2:5.8, 3:14.1, 4:6.3, 5:5.9, 6:5.2, 7:6.1, 8:6.8,
+  9:7.4, 10:5.5, 11:6.0, 12:5.3, 13:8.2, 14:5.6, 15:5.8, 16:4.8, 17:3.0
+};
+
+const TOTAL_PAPERS=Object.values(SDG_COUNTS).reduce((a,b)=>a+b,0);
+function computeGapIndex(){
+  const gaps={};
+  for(let id=1;id<=17;id++){
+    const instShare=((SDG_COUNTS[id]||0)/TOTAL_PAPERS)*100;
+    const globalShare=GLOBAL_SDG_SHARE[id]||0;
+    gaps[id]=+(instShare-globalShare).toFixed(1);
+  }
+  return gaps;
+}
+const GAP_INDEX=computeGapIndex();
+const UNDER_INDEXED=Object.entries(GAP_INDEX).sort((a,b)=>a[1]-b[1]).slice(0,5).map(([id,v])=>({id:+id,gap:v}));
+const OVER_INDEXED=Object.entries(GAP_INDEX).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([id,v])=>({id:+id,gap:v}));
+const LARGEST_GAP=UNDER_INDEXED[0];
+
+function getPriorityTag(gapValue){
+  const mag=Math.abs(gapValue);
+  if(mag>5) return {label:"High",color:"#92400e",bg:"#fef3c7",border:"#fde68a"};
+  if(mag>=2) return {label:"Medium",color:"#1e40af",bg:"#dbeafe",border:"#bfdbfe"};
+  return {label:"Low",color:"#6b7280",bg:"#f3f4f6",border:"#e5e7eb"};
+}
+
+function computeGapClosure(sdgId){
+  const gap=GAP_INDEX[sdgId];
+  const instShare=((SDG_COUNTS[sdgId]||0)/TOTAL_PAPERS)*100;
+  const globalShare=GLOBAL_SDG_SHARE[sdgId]||0;
+  if(gap<0){
+    const requiredPapers=Math.ceil((globalShare-instShare)/100*TOTAL_PAPERS);
+    return {type:"under",required:requiredPapers,sdgId,gap};
+  }
+  if(gap>0){
+    const excessPapers=Math.floor((instShare-globalShare)/100*TOTAL_PAPERS);
+    return {type:"over",excess:excessPapers,sdgId,gap};
+  }
+  return {type:"aligned",sdgId,gap:0};
+}
+
+// ── Contextual AI Insights (deterministic, rule-based) ────────
+function generateStrategicSnapshot(selectedSDG){
+  const total=TOTAL_PAPERS;
+  if(selectedSDG){
+    const id=selectedSDG;
+    const meta=SDG_META[id];
+    const count=SDG_COUNTS[id]||0;
+    const gap=GAP_INDEX[id];
+    const globalShare=GLOBAL_SDG_SHARE[id];
+    const instShare=((count)/total*100).toFixed(1);
+    const relevantResearchers=RESEARCHERS.filter(r=>r.sdgs.includes(id));
+    const relevantDepts=DEPT_DATA.filter(d=>d.sdgs.includes(id));
+    const relevantKeywords=KEYWORDS.filter(k=>k.sdgs.includes(id));
+    const closure=computeGapClosure(id);
+    const insights=[];
+    if(count===0){
+      insights.push({icon:"down",color:"#ef4444",text:`SDG ${id} (${meta.name}) has zero Gies publications. Global benchmark allocates ${globalShare}% — a ${Math.abs(gap)}pp gap and strategic opportunity.`});
+    } else {
+      insights.push({icon:"up",color:meta.color,text:`SDG ${id} (${meta.name}): ${count} papers (${instShare}% of output). ${gap>=0?`+${gap}pp above benchmark.`:`${Math.abs(gap)}pp below benchmark.`} ${relevantDepts.length>0?`Active in ${relevantDepts.map(d=>d.dept).join(", ")}.`:""}`});
+    }
+    if(relevantResearchers.length>0){
+      const topR=relevantResearchers.slice(0,3);
+      insights.push({icon:"globe",color:"#0A97D9",text:`Key researchers: ${topR.map(r=>`${r.name} (${r.count} papers)`).join("; ")}.`});
+    } else {
+      insights.push({icon:"down",color:"#ef4444",text:`No researchers currently indexed for SDG ${id}. Faculty recruitment or cross-departmental initiative opportunity.`});
+    }
+    if(closure.type==="under"){
+      insights.push({icon:"trend",color:"#e85d26",text:`Gap closure requires +${closure.required} additional papers to match global SDG ${id} share.`});
+    } else if(closure.type==="over"){
+      insights.push({icon:"up",color:"#16a34a",text:`Exceeds global benchmark by ~${closure.excess} papers. Position for thought leadership.`});
+    }
+    if(relevantKeywords.length>0){
+      insights.push({icon:"globe",color:"#6366f1",text:`Research themes: ${relevantKeywords.slice(0,4).map(k=>k.word).join(", ")}.`});
+    }
+    return insights;
+  }
+  const top2=Object.entries(SDG_COUNTS).sort((a,b)=>b[1]-a[1]).slice(0,2);
+  const zeros=Object.entries(SDG_COUNTS).filter(([,c])=>c===0).map(([id])=>+id);
+  const bigUnder=UNDER_INDEXED[0];
+  const bigOver=OVER_INDEXED[0];
+  const growth=Math.round(((76-17)/17)*100);
+  return [
+    {icon:"up",color:"#3F7E44",text:`Top output: SDG ${top2[0][0]} (${top2[0][1]} papers) and SDG ${top2[1][0]} (${top2[1][1]} papers) — ${Math.round((+top2[0][1]+ +top2[1][1])/total*100)}% of sustainable output.`},
+    {icon:"down",color:"#ef4444",text:`Zero coverage: ${zeros.map(id=>`SDG ${id} (${SDG_META[id].name})`).join(", ")} — unaddressed global priorities.`},
+    {icon:"globe",color:"#0A97D9",text:`Largest gap: SDG ${bigUnder.id} at ${Math.abs(bigUnder.gap)}pp under. Strongest: SDG ${bigOver.id} at +${bigOver.gap}pp over benchmark.`},
+    {icon:"trend",color:"#e85d26",text:`Growth: +${growth}% from 2010–2020 (17 to 76 papers/year). Peak acceleration +${Math.round((76-65)/65*100)}% in final year.`}
+  ];
+}
+
+// ── Strategic Recommendations with bullet + rationale structure ──
+function generateRecommendations(selectedSDG){
+  if(selectedSDG){
+    const id=selectedSDG;
+    const gap=GAP_INDEX[id];
+    const count=SDG_COUNTS[id]||0;
+    const meta=SDG_META[id];
+    const relevantResearchers=RESEARCHERS.filter(r=>r.sdgs.includes(id));
+    const nonCoveredDepts=DEPT_DATA.filter(d=>!d.sdgs.includes(id));
+    const recs=[];
+    if(count===0){
+      recs.push({bullet:`Initiate targeted faculty recruitment for SDG ${id} (${meta.name})`,rationale:`Zero coverage against ${GLOBAL_SDG_SHARE[id]}% global benchmark. New hires in ${nonCoveredDepts.map(d=>d.dept).join(", ")} would address this directly.`});
+      recs.push({bullet:`Explore cross-departmental seed grants for SDG ${id}`,rationale:`Interdisciplinary funding incentivizes research from existing faculty without new hiring costs.`});
+      recs.push({bullet:`Consider external institutional partnerships`,rationale:`Collaborating with active institutions accelerates output while Gies builds internal capacity.`});
+    } else if(gap<-3){
+      recs.push({bullet:`Expand research capacity in SDG ${id} — ${Math.abs(gap)}pp below benchmark`,rationale:`Significant gap relative to global norms. Targeted investment can close this within 2–3 funding cycles.`});
+      if(relevantResearchers.length>0){
+        recs.push({bullet:`Support ${relevantResearchers.slice(0,2).map(r=>r.name).join(", ")} with additional resources`,rationale:`Existing researchers have demonstrated output; incremental support yields faster returns.`});
+      }
+      if(nonCoveredDepts.length>0){
+        recs.push({bullet:`Incentivize ${nonCoveredDepts[0].dept} faculty to contribute`,rationale:`Cross-departmental grants broaden the research base and reduce concentration risk.`});
+      }
+    } else if(gap<0){
+      recs.push({bullet:`Modest investment — ${Math.abs(gap)}pp below benchmark`,rationale:`Manageable gap. Supporting current researchers can close it incrementally.`});
+      recs.push({bullet:`Leverage existing work by ${relevantResearchers.length>0?relevantResearchers[0].name:"current faculty"}`,rationale:`Building on demonstrated capability is more efficient than new program creation.`});
+    } else {
+      recs.push({bullet:`Position Gies as thought leader in ${meta.name} (+${gap}pp)`,rationale:`Exceeding global benchmark presents a branding and donor engagement opportunity.`});
+      recs.push({bullet:`Publish institutional impact reports highlighting SDG ${id}`,rationale:`Research leadership directly supports fundraising and recruitment objectives.`});
+      if(relevantResearchers.length>1){
+        recs.push({bullet:`Facilitate ${relevantResearchers[0].name} + ${relevantResearchers[1].name} collaboration`,rationale:`Deepening existing strengths compounds the leadership position.`});
+      }
+    }
+    return recs.slice(0,4);
+  }
+  const zeroSDGs=Object.entries(SDG_COUNTS).filter(([,c])=>c===0).map(([id])=>+id);
+  const bigUnder=UNDER_INDEXED.slice(0,2);
+  return [
+    {bullet:`Expand faculty hiring in ${zeroSDGs.map(id=>`SDG ${id}`).join(" & ")}`,rationale:`Zero coverage against ~5.7% global benchmark each — most actionable gap.`},
+    {bullet:`Cross-department SDG ${bigUnder[1]?.id||2} seed grants`,rationale:`Targeted interdisciplinary funding addresses the second-largest gap efficiently.`},
+    {bullet:`Reallocate ~${Math.round(zeroSDGs.length/17*100)}% of sustainability funding to under-indexed areas`,rationale:`${bigUnder.map(g=>`SDG ${g.id}`).join(", ")} are highest-priority reallocation targets.`},
+    {bullet:`Leverage SDG 3 and SDG 10 for donor engagement narratives`,rationale:`Over-indexing provides compelling evidence for fundraising storytelling.`}
+  ];
+}
+
+function generateGlobalInsights(){
+  const bigUnder=UNDER_INDEXED.slice(0,3);
+  const bigOver=OVER_INDEXED.slice(0,2);
+  const topCountry=Object.entries(COUNTRY_DATA).sort((a,b)=>b[1].count-a[1].count)[0];
+  return [
+    `Research reaches ${Object.keys(COUNTRY_DATA).length} countries; ${topCountry[0]} leads with ${topCountry[1].count} co-publication signals.`,
+    `Largest gaps: ${bigUnder.map(g=>`SDG ${g.id} (${g.gap}pp)`).join(", ")} — priority areas for faculty recruitment.`,
+    `Strongest alignment: ${bigOver.map(g=>`SDG ${g.id} (+${g.gap}pp)`).join(", ")} — exceeds global benchmarks.`,
+    `SDG 14 and 15 at zero coverage vs. ~5.7% global benchmark — most actionable strategic gaps.`
+  ];
+}
+
+function generateAIResponse(msg){
+  const q=msg.toLowerCase();
+  if(q.includes("climate")||q.includes("carbon")||q.includes("sdg 13")){
+    return "Climate Action (SDG 13): 46 papers, +7.1pp vs benchmark. Led by Fullerton (35 papers, carbon pricing) and Deryugina (12 papers, climate economics). Note: SDG 14/15 remain at zero — adjacent but unaddressed.";
+  }
+  if(q.includes("gap")||q.includes("missing")||q.includes("zero")||q.includes("benchmark")){
+    return `Gap Index summary:\n\nUnder-indexed:\n${UNDER_INDEXED.slice(0,3).map(g=>`  SDG ${g.id} ${SDG_META[g.id].name}: ${g.gap}pp`).join("\n")}\n\nOver-indexed:\n${OVER_INDEXED.slice(0,3).map(g=>`  SDG ${g.id} ${SDG_META[g.id].name}: +${g.gap}pp`).join("\n")}`;
+  }
+  if(q.includes("collaborat")||q.includes("partner")||q.includes("sdg 17")){
+    return "Top pairing: Fullerton + Lough (94% compatibility). Both in environmental economics across Finance and Business Admin. Zero co-publications despite 88 combined papers. SDG 17 is Gies' strongest area (+14.6pp).";
+  }
+  if(q.includes("grow")||q.includes("trend")||q.includes("year")){
+    return "Growth: +347% from 2010 to 2020 (17 to 76 papers/year). Acceleration post-2017. Business Admin and Finance drove most growth. No post-2020 data indexed.";
+  }
+  if(q.includes("researcher")||q.includes("professor")||q.includes("faculty")||q.includes("who")){
+    return "Top researchers:\n  Lough (Business Admin) — 53 papers, SDG 17\n  Fullerton (Finance) — 35 papers, SDG 13\n  Ahsen (Business Admin) — 29 papers, SDG 3\n  Rios (Affiliates) — 17 papers, SDG 10";
+  }
+  if(q.includes("health")||q.includes("sdg 3")){
+    return "SDG 3: 141 papers, +19.3pp above benchmark. Led by Ahsen (29), Molitor (13), Reif (13). Most cross-departmental SDG at Gies.";
+  }
+  if(q.includes("department")||q.includes("dept")||q.includes("finance")||q.includes("business")){
+    return "Departments:\n  Business Admin: 250 papers (58.7%)\n  Finance: 121 papers (28.4%)\n  Accountancy: 34 papers (8.0%)\n  Affiliates: 21 papers (4.9%)\n\nBusiness Admin + Finance = 87% of output.";
+  }
+  if(q.includes("recommend")||q.includes("action")||q.includes("strategy")){
+    return "Recommendations:\n  Expand hiring in SDG 14 & 15 (zero coverage)\n  Cross-department SDG 2 seed grants\n  Reallocate ~12% of funding to under-indexed areas\n  Leverage SDG 3/10 strengths for donor engagement";
+  }
+  return "Ask about: SDG gaps, researchers, collaborations, departments, trends, or recommendations. Covering 2,022 papers (2010-2020).";
+}
+
+// ── COMPONENTS ───────────────────────────────────────────────
+
+function ShimmerBlock({lines=3}){
+  return (
+    <div style={{padding:2}}>
+      {Array.from({length:lines}).map((_,i)=>(
+        <div key={i} className="shimmer-line" style={{width:i===lines-1?"60%":"100%"}}/>
+      ))}
+    </div>
+  );
+}
+
+// ── SDG Wheel — UPGRADED: ~12% larger (360x360), focal visual anchor ──
+function SDGWheel({selected,onToggle,showGlobal}){
+  const cx=180,cy=180,ir=76,r=162,sweep=(2*Math.PI)/17;
+  const total=Object.values(SDG_COUNTS).reduce((a,b)=>a+b,0);
+  const selTotal=selected.reduce((s,id)=>s+(SDG_COUNTS[id]||0),0);
+  const globalTotal=Object.values(GLOBAL_SDG_SHARE).reduce((a,b)=>a+b,0);
+  const outerR=174, outerIr=165;
+  return (
+    <svg viewBox="0 0 360 360" style={{width:"100%",height:"100%",filter:"drop-shadow(0 4px 20px rgba(0,0,0,0.08))"}}>
+      {showGlobal&&(
+        <g opacity=".35">
+          {Array.from({length:17},(_,i)=>{
+            const id=i+1;
+            let startAngle=-Math.PI/2;
+            for(let j=1;j<id;j++) startAngle+=(GLOBAL_SDG_SHARE[j]/globalTotal)*2*Math.PI;
+            const arcLen=(GLOBAL_SDG_SHARE[id]/globalTotal)*2*Math.PI;
+            const ea=startAngle+arcLen;
+            const c1=Math.cos(startAngle),s1=Math.sin(startAngle),c2=Math.cos(ea),s2=Math.sin(ea);
+            const d=`M${cx+outerIr*c1} ${cy+outerIr*s1}L${cx+outerR*c1} ${cy+outerR*s1}A${outerR} ${outerR} 0 0 1 ${cx+outerR*c2} ${cy+outerR*s2}L${cx+outerIr*c2} ${cy+outerIr*s2}A${outerIr} ${outerIr} 0 0 0 ${cx+outerIr*c1} ${cy+outerIr*s1}`;
+            return <path key={id} d={d} fill={SDG_META[id].color} stroke="white" strokeWidth="1"/>;
+          })}
+        </g>
+      )}
+      <g className="sdg-ring">
+        {Array.from({length:17},(_,i)=>{
+          const id=i+1,sa=i*sweep-Math.PI/2,ea=sa+sweep;
+          const c1=Math.cos(sa),s1=Math.sin(sa),c2=Math.cos(ea),s2=Math.sin(ea);
+          const mid=sa+sweep/2;
+          const isSel=selected.includes(id),anysel=selected.length>0;
+          const d=`M${cx+ir*c1} ${cy+ir*s1}L${cx+r*c1} ${cy+r*s1}A${r} ${r} 0 0 1 ${cx+r*c2} ${cy+r*s2}L${cx+ir*c2} ${cy+ir*s2}A${ir} ${ir} 0 0 0 ${cx+ir*c1} ${cy+ir*s1}`;
+          return (
+            <g key={id} onClick={()=>onToggle(id)} style={{cursor:"pointer",opacity:anysel&&!isSel ? 0.18 : 1,transition:"opacity .3s",filter:isSel?"drop-shadow(0 0 6px rgba(0,0,0,.3))":"none"}}>
+              <path d={d} fill={SDG_META[id].color} stroke="white" strokeWidth="2.5"/>
+              <text x={cx+(r-24)*Math.cos(mid)} y={cy+(r-24)*Math.sin(mid)+1} textAnchor="middle" dominantBaseline="middle" fontSize="11" fill="white" fontWeight="bold">{id}</text>
+            </g>
+          );
+        })}
+      </g>
+      <circle cx={cx} cy={cy} r={ir-2} fill="white" style={{filter:"drop-shadow(0 2px 8px rgba(0,0,0,.06))"}}/>
+      {selected.length>0?(
+        <>
+          <text x={cx} y={cy-18} textAnchor="middle" fontSize="36" fontWeight="900" fill="#0a1628">{selTotal}</text>
+          <text x={cx} y={cy+5} textAnchor="middle" fontSize="8.5" fill="#94a3b8" letterSpacing="1.5">PAPERS</text>
+          <text x={cx} y={cy+20} textAnchor="middle" fontSize="8" fill={SDG_META[selected[0]]?.color||"#94a3b8"} fontWeight="700">SDG {selected.join(", ")}</text>
+          <text x={cx} y={cy+34} textAnchor="middle" fontSize="7.5" fill="#94a3b8">{SDG_META[selected[0]]?.name}</text>
+        </>
+      ):(
+        <>
+          <text x={cx} y={cy-16} textAnchor="middle" fontSize="36" fontWeight="900" fill="#0a1628">{total}</text>
+          <text x={cx} y={cy+5} textAnchor="middle" fontSize="8.5" fill="#94a3b8" letterSpacing="1.5">TOTAL PAPERS</text>
+          {showGlobal?(
+            <>
+              <text x={cx} y={cy+20} textAnchor="middle" fontSize="7.5" fill="#64748b">Inner = Gies</text>
+              <text x={cx} y={cy+32} textAnchor="middle" fontSize="7.5" fill="#64748b" opacity=".6">Outer = Global</text>
+            </>
+          ):(
+            <>
+              <text x={cx} y={cy+20} textAnchor="middle" fontSize="8" fill="#94a3b8">15 of 17 SDGs covered</text>
+              <text x={cx} y={cy+34} textAnchor="middle" fontSize="7" fill="#cbd5e1">click segments to filter</text>
+            </>
+          )}
+        </>
+      )}
+    </svg>
+  );
+}
+
+// ── WORLD MAP — D3 Natural Earth projection + TopoJSON ───────
+function WorldMap(){
+  const containerRef=React.useRef(null);
+  const svgRef=React.useRef(null);
+  const [ready,setReady]=React.useState(false);
+  const [error,setError]=React.useState(false);
+  const W=960,H=500;
+
+  React.useEffect(()=>{
+    let cancelled=false;
+    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
+      .then(r=>{if(!r.ok)throw new Error();return r.json();})
+      .then(topo=>{
+        if(cancelled)return;
+        const countries=topojson.feature(topo,topo.objects.countries);
+        const borders=topojson.mesh(topo,topo.objects.countries,(a,b)=>a!==b);
+        renderMap(countries,borders);
+        setReady(true);
+      })
+      .catch(()=>{if(!cancelled)setError(true);});
+    return()=>{cancelled=true;};
+  },[]);
+
+  function renderMap(countries,borders){
+    const svg=d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+
+    // --- Natural Earth projection, fitted to viewBox ---
+    const projection=d3.geoNaturalEarth1()
+      .fitSize([W-40,H-40],countries)
+      .translate([W/2,H/2]);
+    const path=d3.geoPath(projection);
+
+    // --- Defs: glow filter for hovered bubbles ---
+    const defs=svg.append("defs");
+    const filt=defs.append("filter").attr("id","mapGlow");
+    filt.append("feGaussianBlur").attr("in","SourceGraphic").attr("stdDeviation","3").attr("result","blur");
+    const merge=filt.append("feMerge");
+    merge.append("feMergeNode").attr("in","blur");
+    merge.append("feMergeNode").attr("in","SourceGraphic");
+
+    // --- Sphere outline (ocean) ---
+    svg.append("path")
+      .datum({type:"Sphere"})
+      .attr("d",path)
+      .attr("fill","#FAFBFC")
+      .attr("stroke","#E2E8F0")
+      .attr("stroke-width",0.8);
+
+    // --- Country fills ---
+    svg.append("g")
+      .selectAll("path")
+      .data(countries.features)
+      .join("path")
+      .attr("d",path)
+      .attr("fill","#E5E7EB")
+      .attr("class","map-country");
+
+    // --- Internal borders ---
+    svg.append("path")
+      .datum(borders)
+      .attr("d",path)
+      .attr("fill","none")
+      .attr("stroke","#D1D5DB")
+      .attr("stroke-width",0.5)
+      .attr("stroke-linejoin","round");
+
+    // --- Research bubbles ---
+    const max=Math.max(...Object.values(COUNTRY_DATA).map(d=>d.count));
+    const entries=Object.entries(COUNTRY_DATA).sort((a,b)=>a[1].count-b[1].count);
+
+    const bubbleG=svg.append("g").attr("class","map-bubbles");
+
+    entries.forEach(([name,{lat,lng,count}])=>{
+      const [cx,cy]=projection([lng,lat]);
+      if(cx==null||cy==null)return;
+      const r=6+(count/max)*14;
+
+      const g=bubbleG.append("g").attr("class","map-bubble");
+
+      // Outer glow ring
+      g.append("circle")
+        .attr("class","bubble-outer")
+        .attr("cx",cx).attr("cy",cy).attr("r",r*2)
+        .attr("fill","#e85d26").attr("opacity",0.06);
+
+      // Main circle
+      g.append("circle")
+        .attr("class","bubble-inner")
+        .attr("cx",cx).attr("cy",cy).attr("r",r)
+        .attr("fill","#e85d26")
+        .attr("stroke","#fff").attr("stroke-width",1.5);
+
+      // Count label
+      g.append("text")
+        .attr("x",cx).attr("y",cy+0.5)
+        .attr("text-anchor","middle")
+        .attr("dominant-baseline","central")
+        .attr("fill","#fff")
+        .attr("font-size",r>13?11:9)
+        .attr("font-weight",700)
+        .attr("font-family","system-ui,-apple-system,sans-serif")
+        .attr("pointer-events","none")
+        .text(count);
+
+      // Tooltip group (hidden by default via CSS)
+      const tip=g.append("g").attr("class","map-tooltip");
+      const label=`${name}  ·  ${count} papers`;
+      const tw=label.length*6.2+22;
+      const tx=cx+r+8,ty=cy;
+
+      // Flip tooltip left if it would overflow right edge
+      const flipLeft=tx+tw>W-10;
+      const finalX=flipLeft?cx-r-8-tw:tx;
+
+      tip.append("rect")
+        .attr("x",finalX).attr("y",ty-14)
+        .attr("width",tw).attr("height",28)
+        .attr("rx",6)
+        .attr("fill","#0F172A").attr("opacity",0.92);
+      tip.append("text")
+        .attr("x",finalX+11).attr("y",ty+1)
+        .attr("fill","#fff")
+        .attr("font-size",11)
+        .attr("font-weight",600)
+        .attr("font-family","system-ui,-apple-system,sans-serif")
+        .attr("dominant-baseline","central")
+        .text(label);
+    });
+  }
+
+  return (
+    <div ref={containerRef} style={{borderRadius:10,overflow:"hidden",background:"#FAFBFC",border:"1px solid #E5E7EB"}}>
+      {error?(
+        <div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:12}}>Unable to load map data.</div>
+      ):!ready?(
+        <div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:12,gap:8}}>
+          <svg width="16" height="16" viewBox="0 0 16 16" style={{animation:"sdg-spin 1s linear infinite"}}><circle cx="8" cy="8" r="6" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="28" strokeDashoffset="8"/></svg>
+          Loading map…
+        </div>
+      ):null}
+      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
+        style={{display:ready?"block":"none",width:"100%"}}
+        preserveAspectRatio="xMidYMid meet"/>
+    </div>
+  );
+}
+
+function GapBar({id,gap}){
+  const meta=SDG_META[id];
+  const maxAbs=10;
+  const isNeg=gap<0;
+  const pct=Math.min(Math.abs(gap)/maxAbs*100,100);
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:4}}>
+      <span style={{fontSize:9,color:"#94a3b8",width:40,flexShrink:0}}>SDG {id}</span>
+      <div style={{flex:1,position:"relative",height:10,background:"#f1f5f9",borderRadius:6,overflow:"hidden"}}>
+        <div style={{position:"absolute",height:"100%",width:`${pct}%`,background:isNeg?"#ef4444":meta.color,borderRadius:6,left:isNeg?"auto":"0",right:isNeg?"0":"auto",transition:"all .4s"}}/>
+      </div>
+      <span style={{fontSize:9,fontWeight:700,width:38,textAlign:"right",color:isNeg?"#ef4444":meta.color,flexShrink:0}}>{gap>0?"+":""}{gap}pp</span>
+    </div>
+  );
+}
+
+function GapClosurePanel({selectedSDG}){
+  if(!selectedSDG) return null;
+  const closure=computeGapClosure(selectedSDG);
+  return (
+    <div className="fadein" style={{marginTop:8,padding:"7px 11px",background:closure.type==="under"?"#fef2f2":"#f0fdf4",borderRadius:7,border:`1px solid ${closure.type==="under"?"#fecaca":"#bbf7d0"}`}}>
+      <div style={{fontSize:9,fontWeight:700,color:closure.type==="under"?"#991b1b":"#166534",textTransform:"uppercase",letterSpacing:.8,marginBottom:2}}>Gap Closure</div>
+      {closure.type==="under"?(
+        <div style={{fontSize:11,color:"#7f1d1d",lineHeight:1.5}}>Requires <strong>+{closure.required} papers</strong> to match global share.</div>
+      ):closure.type==="over"?(
+        <div style={{fontSize:11,color:"#14532d",lineHeight:1.5}}>Exceeds benchmark by <strong>{closure.excess} papers</strong>.</div>
+      ):(
+        <div style={{fontSize:11,color:"#6b7280"}}>Aligned with global benchmark.</div>
+      )}
+    </div>
+  );
+}
+
+function PairingPreview({pair}){
+  if(!pair) return null;
+  return (
+    <div className="fadein" style={{background:"#f8fafc",borderRadius:8,padding:11,border:"1px solid #e2e8f0",marginTop:8}}>
+      <div style={{fontSize:9,fontWeight:700,color:"#334155",textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Pairing Analysis</div>
+      {[["Themes",pair.themes.join(", ")],["Shared SDGs",pair.sharedSdgs.map(s=>`SDG ${s}`).join(", ")],["Impact",pair.impactPotential]].map(([l,v])=>(
+        <div key={l} style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:3}}>
+          <span style={{color:"#64748b"}}>{l}</span>
+          <span style={{fontWeight:600,color:"#334155",textAlign:"right",maxWidth:"60%"}}>{v}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DataSourcesModal({onClose}){
+  const chain=[
+    {icon:"S",label:"Elsevier Scopus",sub:"World's largest peer-reviewed literature index",color:"#3b82f6"},
+    {icon:"U",label:"Illinois Experts",sub:"University of Illinois Research Information Management portal",color:"#8b5cf6"},
+    {icon:"G",label:"Gies Faculty",sub:"Filtered to Business Admin, Finance, Accountancy, Affiliates",color:"#e85d26"},
+    {icon:"C",label:"SDG Classification",sub:"UN-defined keyword mapping across all 17 SDGs",color:"#3F7E44"},
+    {icon:"B",label:"Global Benchmark",sub:"Normalized from UN SDG 2023 distribution",color:"#f59e0b"},
+    {icon:"D",label:"This Dashboard",sub:"2,022 publications (2010-2020), 426 sustainable papers",color:"#0a1628"}
+  ];
+  return (
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:"white",borderRadius:18,padding:28,maxWidth:560,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,.2)",position:"relative",maxHeight:"90vh",overflowY:"auto"}}>
+        <button onClick={onClose} style={{position:"absolute",top:12,right:12,width:28,height:28,borderRadius:"50%",border:"none",background:"#f1f5f9",color:"#64748b",fontSize:15,cursor:"pointer"}}>×</button>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
+          <div style={{width:38,height:38,borderRadius:10,background:"#eff6ff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🔬</div>
+          <div>
+            <div style={{fontSize:15,fontWeight:900,color:"#0f172a"}}>Data Sources & Methodology</div>
+            <div style={{fontSize:10,color:"#94a3b8",marginTop:2}}>Collection, classification, and benchmarking pipeline</div>
+          </div>
+        </div>
+        <div style={{background:"#f8fafc",borderRadius:11,padding:14,marginBottom:14}}>
+          <div style={{fontSize:9,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Data Provenance</div>
+          {chain.map((step,i)=>(
+            <div key={step.label}>
+              <div style={{display:"flex",alignItems:"flex-start",gap:9}}>
+                <div style={{width:26,height:26,borderRadius:6,background:step.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:"white",flexShrink:0}}>{step.icon}</div>
+                <div>
+                  <div style={{fontWeight:700,fontSize:12,color:"#0f172a"}}>{step.label}</div>
+                  <div style={{fontSize:10,color:"#64748b",lineHeight:1.5,marginTop:1}}>{step.sub}</div>
+                </div>
+              </div>
+              {i<chain.length-1&&<div style={{marginLeft:12,marginTop:3,marginBottom:3,width:2,height:10,background:"#e2e8f0"}}/>}
+            </div>
+          ))}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:14}}>
+          {[
+            {label:"Total Publications",val:"2,022",sub:"Gies 2010-2020",color:"#0a1628"},
+            {label:"Sustainable Papers",val:"426",sub:"21.1% rate",color:"#3F7E44"},
+            {label:"SDGs Covered",val:"15/17",sub:"SDG 14, 15 at zero",color:"#e85d26"}
+          ].map(s=>(
+            <div key={s.label} style={{background:"#f8fafc",borderRadius:9,padding:10,textAlign:"center",border:"1px solid #e2e8f0"}}>
+              <div style={{fontSize:19,fontWeight:900,color:s.color}}>{s.val}</div>
+              <div style={{fontSize:9,fontWeight:700,color:"#334155",marginTop:2}}>{s.label}</div>
+              <div style={{fontSize:8,color:"#94a3b8",marginTop:1}}>{s.sub}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{padding:"9px 12px",background:"#fffbeb",borderRadius:8,border:"1px solid #fde68a",fontSize:10,color:"#92400e"}}>
+          <strong>Methodology:</strong> All insights are deterministic (rules-based). "AI-assisted" indicates automated analysis, not predictions. Global benchmark normalized from UN SDG 2023 distribution. Architecture supports live bibliometric integration.
+        </div>
+        {[
+          {label:"Illinois Experts — Gies College of Business",url:"https://experts.illinois.edu/en/organisations/gies-college-of-business"},
+          {label:"Illinois Experts — About and FAQ",url:"https://publish.illinois.edu/experts-help/"},
+          {label:"UIUC OVCRI — Find Collaborators",url:"https://research.illinois.edu/funding-proposal-support/find-collaborators-illinois-experts"}
+        ].map(l=>(
+          <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",gap:6,padding:"6px 10px",marginTop:5,background:"#f8fafc",borderRadius:7,border:"1px solid #e2e8f0",color:"#334155",fontSize:10}}>
+            <span style={{flex:1}}>{l.label}</span><span style={{color:"#94a3b8"}}>↗</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN APP ──────────────────────────────────────────────────
+function App(){
+  const [tab,setTab]=useState("overview");
+  const [selSDGs,setSelSDGs]=useState([]);
+  const [selYear,setSelYear]=useState("All");
+  const [netDept,setNetDept]=useState(null);
+  const [chatInput,setChatInput]=useState("");
+  const [chatMsgs,setChatMsgs]=useState([]);
+  const [chatLoad,setChatLoad]=useState(false);
+  const [showSources,setShowSources]=useState(false);
+  const [showGlobal,setShowGlobal]=useState(false);
+  const [aiLoading,setAiLoading]=useState(false);
+  const [personaView,setPersonaView]=useState("donor");
+  const [selectedPairing,setSelectedPairing]=useState(null);
+  const [showWeightInfo,setShowWeightInfo]=useState(false);
+  // ── Refinement 1: Snapshot expand/collapse ──
+  const [snapshotExpanded,setSnapshotExpanded]=useState(false);
+  // ── Refinement 2: Recommendation rationale toggles ──
+  const [expandedRec,setExpandedRec]=useState(null);
+  // ── Refinement 5: AI chat collapsed by default ──
+  const [chatOpen,setChatOpen]=useState(false);
+
+  const toggleSDG=id=>{
+    setAiLoading(true);
+    setSelSDGs(p=>p.includes(id)?p.filter(x=>x!==id):[id]);
+    setSnapshotExpanded(false);
+    setExpandedRec(null);
+    setTimeout(()=>setAiLoading(false),350);
+  };
+  const clearSDG=()=>{
+    setAiLoading(true);
+    setSelSDGs([]);
+    setSnapshotExpanded(false);
+    setExpandedRec(null);
+    setTimeout(()=>setAiLoading(false),250);
+  };
+
+  const filteredDepts=useMemo(()=>{
+    if(selSDGs.length===0) return DEPT_DATA;
+    return DEPT_DATA.map(d=>({...d,
+      c:selSDGs.some(s=>d.sdgs.includes(s))?d.c:Math.round(d.c*0.12),
+      dim:!selSDGs.some(s=>d.sdgs.includes(s))
+    }));
+  },[selSDGs]);
+  const filteredResearchers=useMemo(()=>{
+    if(selSDGs.length===0) return RESEARCHERS;
+    return RESEARCHERS.filter(r=>selSDGs.some(s=>r.sdgs.includes(s)));
+  },[selSDGs]);
+  const filteredKeywords=useMemo(()=>{
+    if(selSDGs.length===0) return KEYWORDS;
+    return KEYWORDS.filter(k=>selSDGs.some(s=>k.sdgs.includes(s)));
+  },[selSDGs]);
+  const activePapers=useMemo(()=>{
+    if(selSDGs.length===0) return 426;
+    return selSDGs.reduce((s,id)=>s+(SDG_COUNTS[id]||0),0);
+  },[selSDGs]);
+  const snapshot=useMemo(()=>generateStrategicSnapshot(selSDGs.length===1?selSDGs[0]:null),[selSDGs]);
+  const recommendations=useMemo(()=>generateRecommendations(selSDGs.length===1?selSDGs[0]:null),[selSDGs]);
+  const globalInsights=useMemo(()=>generateGlobalInsights(),[]);
+
+  const handleChat=()=>{
+    if(!chatInput.trim())return;
+    const msg=chatInput; setChatInput("");
+    setChatMsgs(p=>[...p,{role:"user",text:msg}]);
+    setChatLoad(true);
+    setTimeout(()=>{
+      setChatMsgs(p=>[...p,{role:"ai",text:generateAIResponse(msg)}]);
+      setChatLoad(false);
+    },500+Math.random()*400);
+  };
+  const handlePersonaSwitch=(view)=>{
+    setPersonaView(view);
+    if(view==="student") setTab("network"); else setTab("overview");
+  };
+
+  const TABS=[{id:"overview",label:"Overview"},{id:"network",label:"Network"},{id:"globalimpact",label:"Global Impact"},{id:"personas",label:"Who Uses This"}];
+  const NET_NODES=[{dept:"Business Admin",x:280,y:160,c:250},{dept:"Finance",x:430,y:100,c:121},{dept:"Accountancy",x:440,y:250,c:34},{dept:"Gies Affiliates",x:150,y:200,c:21}];
+  const NET_LINKS=[["Business Admin","Finance"],["Business Admin","Accountancy"],["Finance","Accountancy"],["Business Admin","Gies Affiliates"]];
+  const KW_COLORS=["#e85d26","#3F7E44","#0A97D9","#DDA63A","#DD1367","#FD6925","#A21942","#26BDE2"];
+  const KW_MAX=Math.max(...KEYWORDS.map(k=>k.count));
+
+  // ── Executive style tokens ──
+  const S={
+    card:{background:"white",borderRadius:8,padding:10,boxShadow:"0 1px 3px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.02)",border:"1px solid #eef2f7"},
+    label:{fontSize:8,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1},
+    aiTag:{display:"inline-flex",alignItems:"center",gap:3,fontSize:7,fontWeight:600,color:"#6366f1",background:"#eef2ff",padding:"2px 6px",borderRadius:20,border:"1px solid #e0e7ff"}
+  };
+  const snapshotIcons={up:"▲",down:"▼",globe:"◉",trend:"→"};
+  const visibleSnapshot=snapshotExpanded?snapshot:snapshot.slice(0,2);
+
+  return (
+    <div style={{minHeight:"100vh",background:"#f8fafc"}}>
+      {showSources&&<DataSourcesModal onClose={()=>setShowSources(false)}/>}
+
+      {/* ── HEADER ── */}
+      <header style={{background:"#0a1628",position:"sticky",top:0,zIndex:50,boxShadow:"0 1px 8px rgba(0,0,0,.2)"}}>
+        <div style={{maxWidth:1400,margin:"0 auto",padding:"0 20px",height:46,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+          <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0}}>
+            <div style={{width:32,height:32,borderRadius:8,background:"#e85d26",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"white",fontSize:15}}>G</div>
+            <div>
+              <div style={{color:"white",fontWeight:700,fontSize:13,lineHeight:1}}>Gies College of Business</div>
+              <div style={{color:"#64748b",fontSize:10,marginTop:1}}>Impact Command Center</div>
+            </div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:3,background:"rgba(255,255,255,.06)",padding:3,borderRadius:20,border:"1px solid rgba(255,255,255,.08)"}}>
+            <button onClick={()=>handlePersonaSwitch("donor")} style={{fontSize:10,fontWeight:600,padding:"5px 12px",borderRadius:16,border:"none",cursor:"pointer",background:personaView==="donor"?"#e85d26":"transparent",color:personaView==="donor"?"white":"#64748b",transition:"all .2s"}}>🎯 Donor View</button>
+            <button onClick={()=>handlePersonaSwitch("student")} style={{fontSize:10,fontWeight:600,padding:"5px 12px",borderRadius:16,border:"none",cursor:"pointer",background:personaView==="student"?"#6366f1":"transparent",color:personaView==="student"?"white":"#64748b",transition:"all .2s"}}>🎓 Student View</button>
+          </div>
+          <nav style={{display:"flex",gap:2,background:"rgba(255,255,255,.06)",padding:3,borderRadius:10}}>
+            {TABS.map(t=>(
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"6px 13px",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:tab===t.id?"#e85d26":"transparent",color:tab===t.id?"white":"#94a3b8",transition:"all .2s"}}>{t.label}</button>
+            ))}
+          </nav>
+          <div style={{display:"flex",alignItems:"center",gap:7,flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,.06)",padding:"4px 10px",borderRadius:20}}>
+              <div className="pulse-dot" style={{width:5,height:5,borderRadius:"50%",background:"#4ade80"}}/>
+              <span style={{color:"#4ade80",fontSize:10,fontWeight:600}}>Live Data</span>
+            </div>
+            <button onClick={()=>setShowSources(true)} title="Data Sources" style={{width:27,height:27,borderRadius:"50%",border:"1px solid rgba(255,255,255,.12)",background:"rgba(255,255,255,.05)",color:"#94a3b8",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>i</button>
+          </div>
+        </div>
+      </header>
+
+      <main style={{maxWidth:1400,margin:"0 auto",padding:"8px 20px 12px",display:"flex",flexDirection:"column",gap:8}} className="view-transition" key={personaView+tab}>
+
+        {/* ═══════════ OVERVIEW ═══════════ */}
+        {tab==="overview"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+
+            {/* ── Persona banner ── */}
+            {personaView==="donor"&&(
+              <div className="fadein" style={{background:"linear-gradient(135deg,#fffbeb,#fef3c7)",borderRadius:6,padding:"5px 12px",border:"1px solid #fde68a",display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontSize:11}}>🎯</span>
+                <div>
+                  <div style={{fontSize:10,fontWeight:700,color:"#92400e"}}>Donor Impact View</div>
+                  <div style={{fontSize:9,color:"#a16207"}}>Strategic investment outcomes, SDG alignment, and research impact.</div>
+                </div>
+              </div>
+            )}
+
+            {/* ── KPI Row ── */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6}}>
+              {[
+                {label:personaView==="donor"?"Research Output":"Total Publications",val:"2,022",sub:"Indexed Gies papers",color:"#0a1628"},
+                {label:personaView==="donor"?"Impact Papers":"Sustainable Papers",val:selSDGs.length>0?activePapers:"426",sub:selSDGs.length>0?"Selected SDGs":"Meeting SDG criteria",color:"#3F7E44"},
+                {label:"Sustainability Rate",val:"21.1%",sub:"Of all publications",color:"#e85d26"},
+                {label:"SDGs Addressed",val:"15/17",sub:"SDG 14, 15 at zero",color:"#0A97D9"},
+                {label:"Largest Gap",val:`SDG ${LARGEST_GAP.id}`,sub:`${LARGEST_GAP.gap}pp vs. global`,color:"#ef4444"}
+              ].map(k=>(
+                <div key={k.label} style={{...S.card,padding:"8px 11px"}} className="fadein">
+                  <div style={S.label}>{k.label}</div>
+                  <div style={{fontSize:24,fontWeight:900,color:k.color,margin:"2px 0 1px",letterSpacing:"-.5px"}}>{k.val}</div>
+                  <div style={{fontSize:8,color:"#94a3b8"}}>{k.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* ═══ SDG WHEEL — 3-COLUMN COMMAND CENTER ═══ */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 2fr 1fr",gap:6,alignItems:"start"}}>
+
+              {/* ── LEFT PANEL: SDG Insight Cards ── */}
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                {/* Dynamic insight: selected or default */}
+                {(()=>{
+                  const topSDG=OVER_INDEXED[0];
+                  const gapSDG=UNDER_INDEXED[0];
+                  const selId=selSDGs.length===1?selSDGs[0]:null;
+                  const selCount=selId?SDG_COUNTS[selId]||0:null;
+                  const selShare=selId?((selCount/TOTAL_PAPERS)*100).toFixed(1):null;
+                  const selGap=selId?GAP_INDEX[selId]:null;
+                  return (
+                    <>
+                      {/* Section header */}
+                      <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:0}}>
+                        <div style={{width:4,height:4,borderRadius:"50%",background:"#6366f1"}}/>
+                        <div style={{fontWeight:800,fontSize:12,color:"#0f172a",letterSpacing:"-.2px"}}>SDG Intelligence</div>
+                      </div>
+
+                      {/* Selected SDG detail card */}
+                      {selId?(
+                        <div className="fadein" style={{background:"linear-gradient(135deg,#0a1628,#162544)",borderRadius:8,padding:"8px 9px",display:"flex",flexDirection:"column",gap:5}}>
+                          <div style={{display:"flex",alignItems:"center",gap:7}}>
+                            <div style={{width:24,height:24,borderRadius:6,background:SDG_META[selId].color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"white"}}>{selId}</div>
+                            <div>
+                              <div style={{fontSize:12,fontWeight:700,color:"white",lineHeight:1.2}}>{SDG_META[selId].name}</div>
+                              <div style={{fontSize:9,color:"#94a3b8",marginTop:1}}>Active filter</div>
+                            </div>
+                          </div>
+                          <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                            {[
+                              {icon:"📊",label:"Publications",value:String(selCount),color:"white"},
+                              {icon:"📈",label:"Inst. Share",value:`${selShare}%`,color:"#a5b4fc"},
+                              {icon:selGap>=0?"🟢":"🔴",label:"Gap vs. Global",value:`${selGap>=0?"+":""}${selGap}pp`,color:selGap>=0?"#4ade80":"#f87171"},
+                              {icon:"🎯",label:"Priority",value:getPriorityTag(selGap).label,color:getPriorityTag(selGap).label==="High"?"#fbbf24":"#94a3b8"}
+                            ].map(r=>(
+                              <div key={r.label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 7px",background:"rgba(255,255,255,.04)",borderRadius:5}}>
+                                <div style={{display:"flex",alignItems:"center",gap:5}}>
+                                  <span style={{fontSize:10}}>{r.icon}</span>
+                                  <span style={{fontSize:10,color:"#94a3b8",fontWeight:500}}>{r.label}</span>
+                                </div>
+                                <span style={{fontSize:12,fontWeight:800,color:r.color}}>{r.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <button onClick={clearSDG} style={{marginTop:4,fontSize:10,padding:"6px 0",borderRadius:8,background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",color:"#94a3b8",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Clear filter ✕</button>
+                        </div>
+                      ):(
+                        /* Default state: summary cards */
+                        <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                          <div style={{...S.card,padding:"6px 8px",display:"flex",flexDirection:"column",gap:3}}>
+                            <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:"#f0fdf4",borderRadius:5,border:"1px solid #d1fae5"}}>
+                              <span style={{fontSize:9}}>🟢</span>
+                              <div style={{flex:1}}>
+                                <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Top SDG</div>
+                                <div style={{fontSize:12,fontWeight:800,color:"#16a34a"}}>SDG {topSDG.id}: {SDG_META[topSDG.id].name}</div>
+                              </div>
+                              <span style={{fontSize:10,fontWeight:800,color:"#16a34a"}}>+{topSDG.gap}pp</span>
+                            </div>
+                            <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:"#fef2f2",borderRadius:5,border:"1px solid #fecaca"}}>
+                              <span style={{fontSize:9}}>🔴</span>
+                              <div style={{flex:1}}>
+                                <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Largest Gap</div>
+                                <div style={{fontSize:12,fontWeight:800,color:"#dc2626"}}>SDG {gapSDG.id}: {SDG_META[gapSDG.id].name}</div>
+                              </div>
+                              <span style={{fontSize:10,fontWeight:800,color:"#dc2626"}}>{gapSDG.gap}pp</span>
+                            </div>
+                            <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:"#f8fafc",borderRadius:5,border:"1px solid #eef2f7"}}>
+                              <span style={{fontSize:9}}>🔵</span>
+                              <div style={{flex:1}}>
+                                <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Sustainability Rate</div>
+                                <div style={{fontSize:12,fontWeight:800,color:"#0a1628"}}>21.1%</div>
+                              </div>
+                              <span style={{fontSize:9,color:"#94a3b8"}}>of 2,022</span>
+                            </div>
+                            <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:"#f8fafc",borderRadius:5,border:"1px solid #eef2f7"}}>
+                              <span style={{fontSize:9}}>📊</span>
+                              <div style={{flex:1}}>
+                                <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>SDGs Covered</div>
+                                <div style={{fontSize:12,fontWeight:800,color:"#0a1628"}}>15 of 17</div>
+                              </div>
+                              <span style={{fontSize:9,color:"#ef4444",fontWeight:600}}>2 at zero</span>
+                            </div>
+                            <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:"#fefce8",borderRadius:5,border:"1px solid #fde68a"}}>
+                              <span style={{fontSize:9}}>📈</span>
+                              <div style={{flex:1}}>
+                                <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Growth (2010–2020)</div>
+                                <div style={{fontSize:12,fontWeight:800,color:"#b45309"}}>+347%</div>
+                              </div>
+                              <span style={{fontSize:9,color:"#94a3b8"}}>trend</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+
+                {/* ── Departments (merged from analytics) ── */}
+                <div style={S.card}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
+                    <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Papers by Department</div>
+                    {selSDGs.length>0&&<span style={{fontSize:9,color:"#e85d26",fontWeight:700,padding:"2px 8px",borderRadius:20,background:"#fff7ed",border:"1px solid #fed7aa"}}>Filtered</span>}
+                  </div>
+                  {filteredDepts.map(d=>{
+                    const mx=Math.max(...filteredDepts.map(x=>x.c));
+                    return (
+                      <div key={d.dept} style={{marginBottom:4}}>
+                        <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:1}}>
+                          <span style={{color:d.dim?"#cbd5e1":"#475569",fontWeight:d.dim?400:600}}>{d.dept}</span>
+                          <span style={{fontWeight:700,color:d.dim?"#cbd5e1":"#e85d26"}}>{d.c}</span>
+                        </div>
+                        <div style={{height:5,background:"#f1f5f9",borderRadius:20,overflow:"hidden"}}>
+                          <div style={{width:`${(d.c/mx)*100}%`,height:"100%",background:d.dim?"#e2e8f0":"linear-gradient(90deg,#e85d26,#f97316)",borderRadius:20,transition:"all .5s"}}/>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* ── Researchers ── */}
+                <div style={S.card}>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:5}}>{selSDGs.length>0?`Researchers: SDG ${selSDGs.join(", ")}`:`Top Researchers`}</div>
+                  {(selSDGs.length>0?filteredResearchers:RESEARCHERS.slice(0,5)).map((r,i,a)=>(
+                    <div key={r.name} className="fadein" style={{display:"flex",alignItems:"center",gap:6,marginBottom:i===a.length-1?0:4,padding:"4px 7px",background:"#f8fafc",borderRadius:6,border:"1px solid #f1f5f9"}}>
+                      <div style={{width:24,height:24,borderRadius:"50%",background:SDG_META[r.topSdg]?.color||"#64748b",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,color:"white",flexShrink:0}}>{r.count}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:11,fontWeight:700,color:"#334155",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{r.name}</div>
+                        <div style={{fontSize:9,color:"#94a3b8"}}>{r.dept}</div>
+                      </div>
+                      <span style={{fontSize:9,padding:"3px 7px",borderRadius:20,color:"white",fontWeight:700,background:SDG_META[r.topSdg]?.color||"#64748b",flexShrink:0}}>SDG {r.topSdg}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* ── Strategic Snapshot (fills whitespace) ── */}
+                <div style={{background:"linear-gradient(135deg,#0a1628 0%,#162544 100%)",borderRadius:8,padding:"10px 12px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                    <div style={{width:20,height:20,borderRadius:6,background:"linear-gradient(135deg,#6366f1,#4f46e5)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:800,fontSize:11,color:"white",letterSpacing:"-.2px"}}>{selSDGs.length===1?`SDG ${selSDGs[0]} Summary`:"Strategic Snapshot"}</div>
+                      <div style={{fontSize:8,color:"#64748b",marginTop:1}}>AI-synthesized intelligence</div>
+                    </div>
+                    <span style={{...S.aiTag,color:"#a5b4fc",background:"rgba(165,180,252,.08)",border:"1px solid rgba(165,180,252,.15)"}}>AI</span>
+                  </div>
+                  {aiLoading?(<div style={{padding:"4px 0"}}><ShimmerBlock lines={2}/></div>):(
+                    <>
+                      <div style={{display:"flex",flexDirection:"column",gap:3}} className="fadein">
+                        {visibleSnapshot.map((s,i)=>(
+                          <div key={i} style={{display:"flex",gap:5,background:"rgba(255,255,255,.04)",borderRadius:5,padding:"5px 7px",borderLeft:`3px solid ${s.color}`}}>
+                            <span style={{fontSize:10,color:s.color,flexShrink:0,marginTop:1}}>{snapshotIcons[s.icon]}</span>
+                            <p style={{fontSize:10,color:"#cbd5e1",lineHeight:1.5,margin:0}}>{s.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                      {snapshot.length>2&&(
+                        <button onClick={()=>setSnapshotExpanded(!snapshotExpanded)} style={{marginTop:6,fontSize:9,fontWeight:600,color:"#a5b4fc",background:"none",border:"none",cursor:"pointer",padding:0}}>
+                          {snapshotExpanded?"Show less ▲":`View all ${snapshot.length} insights ▼`}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* ── CENTER PANEL: SDG Wheel + Keywords + Trend ── */}
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                <div style={{...S.card,padding:"6px 10px",display:"flex",flexDirection:"column",alignItems:"center",position:"relative",overflow:"hidden"}}>
+                  {/* Subtle outer glow */}
+                  <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:"90%",height:"90%",borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,.04) 0%,transparent 70%)",pointerEvents:"none"}}/>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",marginBottom:2,position:"relative",zIndex:1}}>
+                    <div>
+                      <div style={{fontWeight:900,fontSize:14,color:"#0f172a",letterSpacing:"-.3px"}}>SDG Research Alignment</div>
+                      <div style={{fontSize:9,color:"#94a3b8",marginTop:1}}>Institutional coverage mapped to 17 UN SDGs</div>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:4,background:"#f8fafc",borderRadius:20,padding:"3px 5px",border:"1px solid #eef2f7"}}>
+                      <button onClick={()=>setShowGlobal(false)} style={{fontSize:10,fontWeight:600,padding:"4px 11px",borderRadius:16,border:"none",cursor:"pointer",background:!showGlobal?"#0a1628":"transparent",color:!showGlobal?"white":"#94a3b8",transition:"all .2s"}}>Institutional</button>
+                      <button onClick={()=>setShowGlobal(true)} style={{fontSize:10,fontWeight:600,padding:"4px 11px",borderRadius:16,border:"none",cursor:"pointer",background:showGlobal?"#6366f1":"transparent",color:showGlobal?"white":"#94a3b8",transition:"all .2s"}}>vs. Global</button>
+                    </div>
+                  </div>
+                  {showGlobal&&<div style={{background:"#f8f7ff",borderRadius:6,padding:"4px 12px",border:"1px solid #e0e7ff",fontSize:9,color:"#4338ca",marginBottom:6,alignSelf:"flex-start",position:"relative",zIndex:1}}>Inner = Gies · Outer = Global (UN SDG 2023)</div>}
+                  <div style={{width:"100%",maxWidth:500,aspectRatio:"1",position:"relative",zIndex:1}}>
+                    <SDGWheel selected={selSDGs} onToggle={toggleSDG} showGlobal={showGlobal}/>
+                  </div>
+                  {/* Active filter strip */}
+                  {selSDGs.length>0?(
+                    <div className="fadein" style={{width:"100%",background:"linear-gradient(135deg,#0a1628,#1e3a5f)",borderRadius:6,padding:"5px 10px",textAlign:"center",marginTop:2,position:"relative",zIndex:1}}>
+                      <div style={{display:"flex",flexWrap:"wrap",gap:4,justifyContent:"center",marginBottom:2}}>
+                        {selSDGs.map(id=><span key={id} style={{fontSize:10,fontWeight:700,padding:"2px 10px",borderRadius:20,color:"white",background:SDG_META[id].color}}>{id}: {SDG_META[id].name}</span>)}
+                      </div>
+                      <div style={{fontSize:18,fontWeight:900,color:"white"}}>{activePapers} <span style={{fontSize:11,fontWeight:600,color:"#94a3b8"}}>papers</span></div>
+                    </div>
+                  ):(
+                    <div style={{fontSize:9,color:"#94a3b8",fontStyle:"italic",marginTop:2,position:"relative",zIndex:1}}>Click any SDG to dynamically filter insights</div>
+                  )}
+                </div>
+                {/* ── Keywords ── */}
+                <div style={S.card}>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:5}}>{selSDGs.length>0?"Relevant Keywords":"Research Keywords"}</div>
+                  {filteredKeywords.length>0?(
+                    <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                      {filteredKeywords.map((k,i)=>(
+                        <span key={k.word} className="fadein" style={{fontSize:10+(k.count/KW_MAX)*5,padding:"3px 10px",borderRadius:20,color:"white",fontWeight:600,background:KW_COLORS[i%KW_COLORS.length]}}>{k.word}</span>
+                      ))}
+                    </div>
+                  ):(<p style={{fontSize:11,color:"#94a3b8",fontStyle:"italic"}}>No keywords match selected SDGs</p>)}
+                </div>
+                {/* ── Trend ── */}
+                <div style={S.card}>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:1}}>Publication Trend</div>
+                  <div style={{fontSize:9,color:"#16a34a",fontWeight:600,marginBottom:5}}>+347% growth · 2010–2020</div>
+                  <div style={{display:"flex",alignItems:"flex-end",gap:2,height:56}}>
+                    {YEAR_DATA.map(y=>(
+                      <div key={y.year} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3,cursor:"pointer"}} onClick={()=>setSelYear(selYear===String(y.year)?"All":String(y.year))}>
+                        <div style={{width:"100%",borderRadius:"4px 4px 0 0",height:`${(y.c/76)*70}px`,background:selYear===String(y.year)?"#e85d26":selSDGs.length>0?"#3F7E44":"#cbd5e1",transition:"all .3s"}} title={`${y.year}: ${y.c}`}/>
+                        <span style={{fontSize:8,color:"#94a3b8"}}>{String(y.year).slice(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── RIGHT PANEL: Gap & Benchmark Index ── */}
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:0}}>
+                  <div style={{width:3,height:3,borderRadius:"50%",background:"#ef4444"}}/>
+                  <div style={{fontWeight:800,fontSize:11,color:"#0f172a",letterSpacing:"-.2px"}}>Gap & Coverage</div>
+                  <span style={S.aiTag}>benchmarking</span>
+                </div>
+
+                {selSDGs.length===1?(
+                  <div className="fadein" style={{...S.card,padding:"8px 9px"}}>
+                    <div style={{fontSize:9,fontWeight:700,color:GAP_INDEX[selSDGs[0]]<0?"#ef4444":"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:4}}>SDG {selSDGs[0]}: {SDG_META[selSDGs[0]].name}</div>
+                    <GapBar id={selSDGs[0]} gap={GAP_INDEX[selSDGs[0]]}/>
+                    <GapClosurePanel selectedSDG={selSDGs[0]}/>
+                  </div>
+                ):(
+                  <div style={{...S.card,padding:"8px 9px",display:"flex",flexDirection:"column"}}>
+                    <div style={{fontSize:8,fontWeight:700,color:"#ef4444",textTransform:"uppercase",letterSpacing:.8,marginBottom:3}}>Under-Indexed</div>
+                    {UNDER_INDEXED.slice(0,3).map(({id,gap})=>(
+                      <div key={id} style={{marginBottom:4}}>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
+                          <div style={{display:"flex",alignItems:"center",gap:5}}>
+                            <div style={{width:6,height:6,borderRadius:"50%",background:SDG_META[id].color,flexShrink:0}}/>
+                            <span style={{fontSize:11,fontWeight:600,color:"#475569"}}>{SDG_META[id].name}</span>
+                          </div>
+                          <span style={{fontSize:11,fontWeight:800,color:"#ef4444"}}>{gap}pp</span>
+                        </div>
+                        <div style={{height:5,background:"#f1f5f9",borderRadius:20,overflow:"hidden"}}>
+                          <div style={{width:`${Math.min(Math.abs(gap)*8,100)}%`,height:"100%",background:"linear-gradient(90deg,#fca5a5,#ef4444)",borderRadius:20}}/>
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{height:1,background:"#eef2f7",margin:"2px 0 3px"}}/>
+                    <div style={{fontSize:8,fontWeight:700,color:"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:3}}>Over-Indexed</div>
+                    {OVER_INDEXED.slice(0,3).map(({id,gap})=>(
+                      <div key={id} style={{marginBottom:4}}>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
+                          <div style={{display:"flex",alignItems:"center",gap:5}}>
+                            <div style={{width:6,height:6,borderRadius:"50%",background:SDG_META[id].color,flexShrink:0}}/>
+                            <span style={{fontSize:11,fontWeight:600,color:"#475569"}}>{SDG_META[id].name}</span>
+                          </div>
+                          <span style={{fontSize:11,fontWeight:800,color:"#16a34a"}}>+{gap}pp</span>
+                        </div>
+                        <div style={{height:5,background:"#f1f5f9",borderRadius:20,overflow:"hidden"}}>
+                          <div style={{width:`${Math.min(gap*8,100)}%`,height:"100%",background:"linear-gradient(90deg,#86efac,#16a34a)",borderRadius:20}}/>
+                        </div>
+                      </div>
+                    ))}
+                    <button onClick={()=>setTab("globalimpact")} style={{marginTop:6,width:"100%",fontSize:10,padding:"6px 0",borderRadius:8,background:"#0a1628",border:"none",color:"white",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Full Gap Analysis →</button>
+                  </div>
+                )}
+
+                {/* ── Gap Index vs Global (merged from analytics) ── */}
+                <div style={S.card}>
+                  <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5}}>
+                    <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Gap Index vs. Global</div>
+                    <span style={S.aiTag}>benchmarking</span>
+                  </div>
+                  {selSDGs.length===1?(
+                    <div className="fadein">
+                      <div style={{fontSize:10,fontWeight:700,color:GAP_INDEX[selSDGs[0]]<0?"#ef4444":"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:6}}>SDG {selSDGs[0]}: {SDG_META[selSDGs[0]].name}</div>
+                      <GapBar id={selSDGs[0]} gap={GAP_INDEX[selSDGs[0]]}/>
+                      <GapClosurePanel selectedSDG={selSDGs[0]}/>
+                    </div>
+                  ):(
+                    <>
+                      <div style={{fontSize:9,fontWeight:700,color:"#ef4444",textTransform:"uppercase",letterSpacing:.8,marginBottom:4}}>Under-Indexed (top 3)</div>
+                      {UNDER_INDEXED.slice(0,3).map(({id,gap})=><GapBar key={id} id={id} gap={gap}/>)}
+                      <div style={{fontSize:9,fontWeight:700,color:"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginTop:6,marginBottom:4}}>Over-Indexed (top 3)</div>
+                      {OVER_INDEXED.slice(0,3).map(({id,gap})=><GapBar key={id} id={id} gap={gap}/>)}
+                    </>
+                  )}
+                  <button onClick={()=>setTab("globalimpact")} style={{marginTop:6,width:"100%",fontSize:11,padding:"7px 0",borderRadius:8,background:"#0a1628",border:"none",color:"white",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Full Gap Analysis →</button>
+                </div>
+
+                {/* ── Strategic Recommendations (fills whitespace) ── */}
+                <div style={{...S.card,background:"#fafdfb",border:"1px solid #d1fae5",padding:"10px 12px",display:"flex",flexDirection:"column"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                    <div style={{width:20,height:20,borderRadius:6,background:"#16a34a",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:800,color:"#1a2e1a",fontSize:11,letterSpacing:"-.2px"}}>{selSDGs.length===1?`SDG ${selSDGs[0]} Actions`:"Recommendations"}</div>
+                      <div style={{fontSize:8,color:"#64748b",marginTop:1}}>Prioritized next steps</div>
+                    </div>
+                    <span style={{...S.aiTag,color:"#16a34a",background:"#f0fdf4",border:"1px solid #bbf7d0"}}>AI</span>
+                  </div>
+                  {aiLoading?(<ShimmerBlock lines={2}/>):(
+                    <div style={{display:"flex",flexDirection:"column",gap:3,flex:1}} className="fadein">
+                      {recommendations.map((rec,i)=>(
+                        <div key={i}>
+                          <div style={{display:"flex",gap:5,padding:"4px 7px",background:"white",borderRadius:5,border:expandedRec===i?"1px solid #86efac":"1px solid #eef2f7",cursor:"pointer",alignItems:"center",transition:"all .15s"}} onClick={()=>setExpandedRec(expandedRec===i?null:i)}>
+                            <div style={{width:16,height:16,borderRadius:4,background:expandedRec===i?"#16a34a":"#f0fdf4",display:"flex",alignItems:"center",justifyContent:"center",color:expandedRec===i?"white":"#16a34a",fontSize:7,fontWeight:800,flexShrink:0,transition:"all .15s",border:expandedRec===i?"none":"1px solid #d1fae5"}}>{i+1}</div>
+                            <p style={{fontSize:10,color:"#334155",lineHeight:1.4,margin:0,flex:1,fontWeight:500}}>{rec.bullet}</p>
+                            <span style={{fontSize:8,color:"#94a3b8",flexShrink:0,transition:"transform .15s",transform:expandedRec===i?"rotate(180deg)":"none"}}>▼</span>
+                          </div>
+                          {expandedRec===i&&(
+                            <div className="fadein" style={{padding:"4px 8px 4px 30px",fontSize:9,color:"#64748b",lineHeight:1.5,background:"#f8fafb",borderRadius:"0 0 6px 6px",borderTop:"1px dashed #d1fae5"}}>{rec.rationale}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* ═══════════ NETWORK ═══════════ */}
+        {tab==="network"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {personaView==="student"&&(
+              <div className="fadein" style={{background:"linear-gradient(135deg,#eef2ff,#e0e7ff)",borderRadius:8,padding:"7px 12px",border:"1px solid #c7d2fe",display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:13}}>🎓</span>
+                <div>
+                  <div style={{fontSize:10,fontWeight:700,color:"#3730a3"}}>Student Research View</div>
+                  <div style={{fontSize:9,color:"#4338ca"}}>Explore researcher profiles and collaboration opportunities.</div>
+                </div>
+              </div>
+            )}
+            <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:10}}>
+              <div style={S.card}>
+                <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:1}}>Collaboration Network</div>
+                <p style={{fontSize:9,color:"#94a3b8",marginBottom:8}}>Click a department to see suggested pairings</p>
+                <svg viewBox="0 0 600 320" style={{width:"100%",height:220}}>
+                  {NET_LINKS.map(([a,b],i)=>{const n1=NET_NODES.find(n=>n.dept===a),n2=NET_NODES.find(n=>n.dept===b);return <line key={i} x1={n1.x} y1={n1.y} x2={n2.x} y2={n2.y} stroke="#e2e8f0" strokeWidth="2"/>;
+                  })}
+                  {NET_NODES.map(n=>{
+                    const rad=Math.sqrt(n.c)*1.6+16,isSel=netDept===n.dept;
+                    return (
+                      <g key={n.dept} onClick={()=>{setNetDept(netDept===n.dept?null:n.dept);setSelectedPairing(null);}} style={{cursor:"pointer"}}>
+                        {isSel&&<circle cx={n.x} cy={n.y} r={rad+10} fill="#e85d26" opacity=".10"/>}
+                        <circle cx={n.x} cy={n.y} r={rad} fill={isSel?"#e85d26":"#3b82f6"} stroke="white" strokeWidth="2.5" opacity={netDept&&!isSel ? 0.3 : 1} style={{transition:"all .3s"}}/>
+                        <text x={n.x} y={n.y+1} textAnchor="middle" dominantBaseline="middle" fontSize="12" fill="white" fontWeight="700">{n.c}</text>
+                        <text x={n.x} y={n.y+rad+14} textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="600">{n.dept}</text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                <div style={S.card}>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:5}}>{netDept?`${netDept} — Pairs`:"Select a Department"}</div>
+                  {netDept&&COLLAB_PAIRS[netDept]?(
+                    <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                      {COLLAB_PAIRS[netDept].map((p,i)=>(
+                        <div key={i} className="fadein" style={{background:selectedPairing===i?"#eff6ff":"#f8fafc",borderRadius:7,padding:9,border:`1px solid ${selectedPairing===i?"#bfdbfe":"#f1f5f9"}`,cursor:"pointer",transition:"all .2s"}} onClick={()=>setSelectedPairing(selectedPairing===i?null:i)}>
+                          <div style={{fontSize:11,fontWeight:700,color:"#334155",marginBottom:2,lineHeight:1.3}}>{p.pair}</div>
+                          <div style={{fontSize:10,color:"#64748b",marginBottom:5}}>{p.outcome}</div>
+                          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                            <span style={{fontSize:9,padding:"2px 6px",borderRadius:20,background:"#fff7ed",color:"#c2410c",fontWeight:700}}>{p.sdgs}</span>
+                            <span style={{fontSize:11,fontWeight:700,color:"#16a34a"}}>{p.score}%</span>
+                          </div>
+                        </div>
+                      ))}
+                      {selectedPairing!==null&&COLLAB_PAIRS[netDept][selectedPairing]&&<PairingPreview pair={COLLAB_PAIRS[netDept][selectedPairing]}/>}
+                    </div>
+                  ):(<p style={{fontSize:11,color:"#94a3b8",fontStyle:"italic"}}>Click a department node to see pairings.</p>)}
+                </div>
+                <div style={S.card}>
+                  <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:8}}>
+                    <div style={{fontWeight:700,color:"#334155",fontSize:12}}>Score Methodology</div>
+                    <div style={{position:"relative",display:"inline-block"}}>
+                      <button onClick={()=>setShowWeightInfo(!showWeightInfo)} style={{width:15,height:15,borderRadius:"50%",border:"1px solid #e2e8f0",background:"#f8fafc",color:"#94a3b8",fontSize:8,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>?</button>
+                      {showWeightInfo&&(
+                        <div style={{position:"absolute",top:"calc(100% + 5px)",left:"50%",transform:"translateX(-50%)",background:"#0a1628",color:"white",padding:"9px 12px",borderRadius:7,fontSize:10,lineHeight:1.5,width:200,zIndex:100,boxShadow:"0 4px 12px rgba(0,0,0,.2)"}}>
+                          <div style={{fontWeight:700,marginBottom:3}}>Weight rationale</div>
+                          <div>40% Research Overlap</div><div>30% SDG Alignment</div><div>15% Dept Diversity</div><div>15% Career Fit</div>
+                          <div style={{marginTop:4,fontSize:9,color:"#94a3b8",borderTop:"1px solid rgba(255,255,255,.1)",paddingTop:4}}>Literature-informed. Adjustable.</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {[{l:"Research Overlap",p:40,c:"#e85d26"},{l:"SDG Alignment",p:30,c:"#3F7E44"},{l:"Dept Diversity",p:15,c:"#0A97D9"},{l:"Career Fit",p:15,c:"#DDA63A"}].map(m=>(
+                    <div key={m.l} style={{marginBottom:6}}>
+                      <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:1}}>
+                        <span style={{color:"#64748b"}}>{m.l}</span><span style={{fontWeight:700,color:m.c}}>{m.p}%</span>
+                      </div>
+                      <div style={{height:5,background:"#f1f5f9",borderRadius:20,overflow:"hidden"}}><div style={{width:`${m.p*2.5}%`,height:"100%",background:m.c,borderRadius:20}}/></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div style={S.card}>
+              <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:7}}>All Sustainability Researchers</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>
+                {RESEARCHERS.map(r=>(
+                  <div key={r.name} style={{padding:8,background:"#f8fafc",borderRadius:7,border:"1px solid #f1f5f9"}}>
+                    <div style={{fontWeight:700,color:"#334155",fontSize:10,marginBottom:1}}>{r.name}</div>
+                    <div style={{fontSize:8,color:"#94a3b8",marginBottom:4}}>{r.dept}</div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <span style={{fontSize:16,fontWeight:900,color:"#e85d26"}}>{r.count}</span>
+                      <span style={{fontSize:8,padding:"2px 5px",borderRadius:20,color:"white",fontWeight:700,background:SDG_META[r.topSdg]?.color||"#64748b"}}>SDG {r.topSdg}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════ GLOBAL IMPACT ═══════════ */}
+        {tab==="globalimpact"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:"3fr 2fr",gap:8}}>
+              <div style={S.card}>
+                <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:7}}>Geospatial Research Reach</div>
+                <WorldMap/>
+                <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:6}}>
+                  {Object.entries(COUNTRY_DATA).sort((a,b)=>b[1].count-a[1].count).map(([c,d])=>(
+                    <span key={c} style={{fontSize:9,color:"#64748b"}}><strong style={{color:"#334155"}}>{c}</strong> {d.count}</span>
+                  ))}
+                </div>
+              </div>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                <div style={S.card}>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:6}}>SDG Coverage</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                    {Object.entries(SDG_META).map(([id,s])=>{
+                      const gies=SDG_COUNTS[Number(id)]||0;
+                      return (
+                        <div key={id} style={{display:"flex",alignItems:"center",gap:5}}>
+                          <span style={{fontSize:8,color:"#94a3b8",width:34}}>SDG {id}</span>
+                          <div style={{flex:1,height:6,background:"#f1f5f9",borderRadius:20,overflow:"hidden"}}><div style={{width:`${(gies/141)*100}%`,height:"100%",background:s.color,borderRadius:20}}/></div>
+                          <span style={{fontSize:9,fontWeight:700,width:20,textAlign:"right",color:gies===0?"#ef4444":s.color}}>{gies===0?"—":gies}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                  <div style={{background:"#f0fdf4",borderRadius:9,padding:10,border:"1px solid #d1fae5"}}>
+                    <div style={{fontSize:9,fontWeight:700,color:"#15803d",marginBottom:4}}>Well Covered</div>
+                    {[3,10,8,9,17].map(id=><div key={id} style={{fontSize:10,color:"#15803d",marginBottom:2}}>SDG {id}: {SDG_COUNTS[id]}</div>)}
+                  </div>
+                  <div style={{background:"#fff1f2",borderRadius:9,padding:10,border:"1px solid #fecdd3"}}>
+                    <div style={{fontSize:9,fontWeight:700,color:"#be123c",marginBottom:4}}>Critical Gaps</div>
+                    {[14,15,6,2,11].map(id=><div key={id} style={{fontSize:10,color:"#be123c",marginBottom:2}}>SDG {id}: {SDG_COUNTS[id]||0}</div>)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              <div style={S.card}>
+                <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6}}>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Gap Index Ranking</div>
+                  <span style={S.aiTag}>benchmarking</span>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+                  <div>
+                    <div style={{fontSize:9,fontWeight:700,color:"#ef4444",textTransform:"uppercase",letterSpacing:.8,marginBottom:5}}>Under-Indexed (Top 5)</div>
+                    {UNDER_INDEXED.map(({id,gap})=><GapBar key={id} id={id} gap={gap}/>)}
+                  </div>
+                  <div>
+                    <div style={{fontSize:9,fontWeight:700,color:"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:5}}>Over-Indexed (Top 5)</div>
+                    {OVER_INDEXED.map(({id,gap})=><GapBar key={id} id={id} gap={gap}/>)}
+                  </div>
+                </div>
+              </div>
+              <div style={{...S.card,background:"#fafafe",border:"1px solid #eee8f7"}}>
+                <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6}}>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Global Alignment Insights</div>
+                  <span style={{...S.aiTag,color:"#7c3aed",background:"#f3e8ff",border:"1px solid #e9d5ff"}}>AI-assisted</span>
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                  {globalInsights.map((insight,i)=>(
+                    <div key={i} style={{display:"flex",gap:6,padding:"6px 9px",background:"white",borderRadius:6,border:"1px solid #f1f5f9"}}>
+                      <span style={{fontSize:10,color:"#7c3aed",fontWeight:800,flexShrink:0,marginTop:1}}>{i+1}</span>
+                      <p style={{fontSize:11,color:"#475569",lineHeight:1.5,margin:0}}>{insight}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div style={S.card}>
+              <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:7}}>All 17 SDGs at Gies</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:5}}>
+                {Object.entries(SDG_META).map(([id,s])=>{
+                  const gies=SDG_COUNTS[Number(id)]||0;
+                  const gap=GAP_INDEX[Number(id)];
+                  const priority=getPriorityTag(gap);
+                  return (
+                    <div key={id} style={{background:"white",borderRadius:6,padding:7,borderLeft:`3px solid ${s.color}`,boxShadow:"0 1px 2px rgba(0,0,0,.03)"}}>
+                      <div style={{fontSize:8,fontWeight:600,color:"#94a3b8",marginBottom:1}}>SDG {id}</div>
+                      <div style={{fontSize:10,fontWeight:700,color:"#334155",lineHeight:1.3,marginBottom:3}}>{s.name}</div>
+                      <div style={{fontSize:16,fontWeight:900,color:gies===0?"#ef4444":s.color}}>{gies===0?"0":gies}</div>
+                      <div style={{fontSize:9,color:gap<0?"#ef4444":"#16a34a",fontWeight:700,marginTop:1}}>{gap>=0?"+":""}{gap}pp</div>
+                      <div style={{marginTop:3,fontSize:7,fontWeight:600,padding:"1px 4px",borderRadius:8,display:"inline-block",color:priority.color,background:priority.bg,border:`1px solid ${priority.border}`}}>{priority.label}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════ PERSONAS ═══════════ */}
+        {tab==="personas"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:12}} className="view-transition">
+            <div>
+              <div style={{fontWeight:900,fontSize:17,color:"#0f172a"}}>Who Uses This Dashboard?</div>
+              <p style={{fontSize:11,color:"#64748b",marginTop:2}}>Two stakeholders, two designed journeys.</p>
+              <div style={{marginTop:6,padding:"5px 10px",background:"#f0f9ff",borderRadius:7,border:"1px solid #bae6fd",fontSize:9,color:"#0369a1",display:"flex",alignItems:"center",gap:5}}>
+                <span style={{fontSize:12}}>💡</span>
+                <span>Use the <strong>Donor / Student</strong> toggle in the header to experience filtered views.</span>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+              {[
+                {name:"Eleanor",role:"University Donor",age:58,avatar:"E",color:"#0a1628",
+                 goal:"See real-world impact before renewing pledge",pain:"Too much data, not enough storytelling",quote:"Is my money making a difference?",
+                 steps:[{l:"Lands on Dashboard",d:"KPI summary"},{l:"Clicks SDG 13",d:"Climate filter"},{l:"Sees 46 papers",d:"Real research"},{l:"Reads Snapshot",d:"Fullerton's work"},{l:"Donates",d:"Confidence"}],
+                 features:["SDG Wheel","Snapshot","Gap Closure","Global Impact"],outcome:"3× more likely to renew",time:"Under 3 min"},
+                {name:"Marcus",role:"Student Researcher",age:22,avatar:"M",color:"#e85d26",
+                 goal:"Find a climate finance professor for RA role",pain:"No idea which professors to approach",quote:"Who at Gies is working on this?",
+                 steps:[{l:"Opens Overview",d:"Keywords"},{l:"Clicks Climate",d:"SDG filter"},{l:"Finance highlights",d:"Bars update"},{l:"Opens Network",d:"Finance node"},{l:"Finds Fullerton",d:"Emails prof"}],
+                 features:["Keywords","Network","Pairings","Researchers"],outcome:"Matched to right professor",time:"Under 5 min"}
+              ].map(p=>(
+                <div key={p.name} style={{background:"white",borderRadius:10,overflow:"hidden",boxShadow:"0 1px 5px rgba(0,0,0,.04)"}}>
+                  <div style={{background:p.color,padding:"12px 14px",display:"flex",alignItems:"center",gap:9}}>
+                    <div style={{width:36,height:36,borderRadius:"50%",background:"rgba(255,255,255,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:900,color:"white",border:"2px solid rgba(255,255,255,.3)"}}>{p.avatar}</div>
+                    <div><div style={{fontWeight:900,color:"white",fontSize:13}}>{p.name}, {p.age}</div><div style={{fontSize:9,color:"rgba(255,255,255,.6)",marginTop:1}}>{p.role}</div></div>
+                    <div style={{marginLeft:"auto",background:"rgba(255,255,255,.10)",borderRadius:8,padding:"6px 10px",maxWidth:170}}>
+                      <div style={{fontSize:8,color:"rgba(255,255,255,.45)",marginBottom:1,fontStyle:"italic"}}>Their words</div>
+                      <div style={{fontSize:10,color:"white",fontWeight:600,lineHeight:1.35}}>"{p.quote}"</div>
+                    </div>
+                  </div>
+                  <div style={{padding:12}}>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:8}}>
+                      <div style={{background:"#f0fdf4",padding:7,borderRadius:6}}>
+                        <div style={{fontSize:7,fontWeight:700,color:"#15803d",marginBottom:2,textTransform:"uppercase",letterSpacing:1}}>Goal</div>
+                        <div style={{fontSize:9,color:"#166534",lineHeight:1.4}}>{p.goal}</div>
+                      </div>
+                      <div style={{background:"#fff1f2",padding:7,borderRadius:6}}>
+                        <div style={{fontSize:7,fontWeight:700,color:"#be123c",marginBottom:2,textTransform:"uppercase",letterSpacing:1}}>Pain Point</div>
+                        <div style={{fontSize:9,color:"#9f1239",lineHeight:1.4}}>{p.pain}</div>
+                      </div>
+                    </div>
+                    <div style={{fontSize:8,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1.5,marginBottom:6}}>5-Step Journey</div>
+                    <div style={{display:"flex",alignItems:"flex-start",marginBottom:8,position:"relative"}}>
+                      <div style={{position:"absolute",top:12,left:14,right:14,height:1.5,background:p.color,opacity:.08}}/>
+                      {p.steps.map((s,i)=>(
+                        <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",textAlign:"center",position:"relative",zIndex:1}}>
+                          <div style={{width:20,height:20,borderRadius:"50%",background:p.color,color:"white",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:3,boxShadow:"0 1px 3px rgba(0,0,0,.08)"}}>{i+1}</div>
+                          <div style={{fontSize:8,fontWeight:700,color:"#334155",lineHeight:1.2}}>{s.l}</div>
+                          <div style={{fontSize:7,color:"#94a3b8",marginTop:1}}>{s.d}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:8}}>
+                      {p.features.map(f=><span key={f} style={{fontSize:8,padding:"2px 6px",borderRadius:20,background:p.color+"10",color:p.color,fontWeight:600,border:`1px solid ${p.color}20`}}>{f}</span>)}
+                    </div>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5}}>
+                      <div style={{background:"#f8fafc",borderRadius:6,padding:"5px 8px",borderLeft:`3px solid ${p.color}`}}>
+                        <div style={{fontSize:8,fontWeight:700,color:"#94a3b8",marginBottom:1}}>OUTCOME</div>
+                        <div style={{fontSize:10,fontWeight:700,color:"#334155"}}>{p.outcome}</div>
+                      </div>
+                      <div style={{background:"#f8fafc",borderRadius:7,padding:"7px 9px",borderLeft:"3px solid #16a34a"}}>
+                        <div style={{fontSize:8,fontWeight:700,color:"#94a3b8",marginBottom:1}}>EFFICIENCY</div>
+                        <div style={{fontSize:10,fontWeight:700,color:"#16a34a"}}>{p.time}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </main>
+
+      {/* ── FLOATING ASK AI BUTTON — persistent on all pages ── */}
+      {!chatOpen&&(
+        <button className="ai-fab" onClick={()=>setChatOpen(true)}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C6.5 2 2 6 2 11c0 2.5 1 4.7 2.7 6.3L3 22l4.7-1.7C9 20.8 10.5 21 12 21c5.5 0 10-4 10-9.5S17.5 2 12 2z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg>
+          Ask AI
+        </button>
+      )}
+
+      {/* ── AI DRAWER — slides from right ── */}
+      {chatOpen&&(
+        <>
+          <div className="ai-drawer-backdrop" onClick={()=>setChatOpen(false)}/>
+          <div className="ai-drawer">
+            {/* Drawer header */}
+            <div style={{padding:"14px 20px 12px",borderBottom:"1px solid #f1f5f9",flexShrink:0}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <div style={{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#6366f1,#4f46e5)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C6.5 2 2 6 2 11c0 2.5 1 4.7 2.7 6.3L3 22l4.7-1.7C9 20.8 10.5 21 12 21c5.5 0 10-4 10-9.5S17.5 2 12 2z"/></svg>
+                  </div>
+                  <div>
+                    <div style={{fontWeight:800,fontSize:14,color:"#0f172a",lineHeight:1}}>Research Intelligence</div>
+                    <div style={{fontSize:10,color:"#94a3b8",marginTop:3}}>AI-assisted decision support</div>
+                  </div>
+                </div>
+                <button onClick={()=>setChatOpen(false)} style={{width:28,height:28,borderRadius:7,border:"1px solid #e2e8f0",background:"#f8fafc",color:"#64748b",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}}>✕</button>
+              </div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                {["Climate researchers?","Biggest gaps?","Growth trends?","Top departments?","Recommendations?"].map(p=>(
+                  <button key={p} onClick={()=>{setChatInput(p);}} style={{fontSize:10,padding:"5px 12px",borderRadius:20,border:"1px solid #e2e8f0",color:"#475569",background:"white",cursor:"pointer",fontWeight:500,transition:"all .15s"}}>{p}</button>
+                ))}
+              </div>
+            </div>
+            {/* Drawer messages */}
+            <div style={{flex:1,overflowY:"auto",padding:"12px 20px",display:"flex",flexDirection:"column",gap:8}}>
+              {chatMsgs.length===0&&(
+                <div style={{textAlign:"center",paddingTop:40,color:"#94a3b8"}}>
+                  <div style={{width:48,height:48,borderRadius:16,background:"#f1f5f9",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",fontSize:20}}>💡</div>
+                  <div style={{fontWeight:700,fontSize:13,color:"#64748b",marginBottom:4}}>Ask anything about Gies research</div>
+                  <div style={{fontSize:11,lineHeight:1.6,maxWidth:260,margin:"0 auto"}}>SDG gaps, researcher profiles, department output, collaboration opportunities, or strategic recommendations.</div>
+                </div>
+              )}
+              {chatMsgs.map((m,i)=>(
+                <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}} className="fadein">
+                  <div style={{maxWidth:"82%",padding:"10px 14px",borderRadius:m.role==="user"?"14px 14px 4px 14px":"14px 14px 14px 4px",fontSize:12,lineHeight:1.6,whiteSpace:"pre-line",background:m.role==="user"?"#0a1628":"#f8fafc",color:m.role==="user"?"white":"#334155",border:m.role==="ai"?"1px solid #e2e8f0":"none",boxShadow:m.role==="ai"?"0 1px 3px rgba(0,0,0,.03)":"none"}}>{m.text}</div>
+                </div>
+              ))}
+              {chatLoad&&(
+                <div style={{display:"flex",gap:5,padding:"10px 14px",background:"#f8fafc",borderRadius:14,border:"1px solid #e2e8f0",width:"fit-content"}}>
+                  {[0,150,300].map(d=><div key={d} className="bounce" style={{width:6,height:6,borderRadius:"50%",background:"#94a3b8",animationDelay:`${d}ms`}}/>)}
+                </div>
+              )}
+            </div>
+            {/* Drawer input */}
+            <div style={{padding:"10px 20px 14px",borderTop:"1px solid #f1f5f9",flexShrink:0,background:"white"}}>
+              <div style={{display:"flex",gap:6}}>
+                <input value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleChat()}
+                  placeholder="Ask about SDGs, researchers, or strategy..."
+                  style={{flex:1,padding:"9px 14px",background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,fontSize:11,outline:"none",transition:"border .15s"}}/>
+                <button onClick={handleChat} disabled={chatLoad||!chatInput.trim()}
+                  style={{padding:"9px 14px",borderRadius:10,color:"white",background:"linear-gradient(135deg,#6366f1,#4f46e5)",border:"none",fontWeight:700,fontSize:11,cursor:"pointer",opacity:chatLoad||!chatInput.trim()?0.4:1,transition:"all .15s",whiteSpace:"nowrap"}}>Send</button>
+              </div>
+              <div style={{textAlign:"center",marginTop:6,fontSize:8,color:"#b0b8c4"}}>Rules-based synthesis · Not predictive AI</div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Single consolidated AI disclaimer in footer ── */}
+      <footer style={{marginTop:8,borderTop:"1px solid #eef2f7",padding:"8px 20px",textAlign:"center",fontSize:9,color:"#94a3b8",lineHeight:1.4}}>
+        <div>Gies College of Business · Impact Command Center · <strong>2,022</strong> publications · <strong>426</strong> sustainable papers</div>
+        <div style={{marginTop:2,fontSize:9,color:"#b0b8c4"}}>
+          Data: Illinois Experts via Elsevier Scopus · Global benchmark: UN SDG 2023 (normalized) · All insights are rules-based synthesis labeled "AI-assisted" — not predictions ·
+          <button onClick={()=>setShowSources(true)} style={{background:"none",border:"none",color:"#6366f1",cursor:"pointer",fontSize:9,marginLeft:2}}>Methodology</button>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
