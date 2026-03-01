@@ -45,14 +45,20 @@ def load_original_publications_from_path(csv_path):
 def load_original_publications():
     """Load the original publications CSV file - tries repository paths first"""
     try:
-        # Get the directory where this script is located
-        script_dir = os.path.dirname(os.path.abspath(__file__))
+        # Get the directory where this script is located (works in both local and Streamlit Cloud)
+        try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+        except:
+            # Fallback if __file__ is not available
+            script_dir = os.getcwd()
+        
         repo_root = os.path.abspath(os.path.join(script_dir, '../..'))
+        current_dir = os.getcwd()
         
         # Try multiple possible paths for the original CSV
-        # Priority: repository root (for Streamlit Cloud), then relative paths (for local dev)
+        # Priority: Streamlit Cloud absolute paths, then repository root, then relative paths
         possible_paths = [
-            # Streamlit Cloud absolute paths (most reliable)
+            # Streamlit Cloud absolute paths (most reliable for deployment)
             '/mount/src/sustainability_case_competition/for distribution case competition filtered_publications.csv',
             # Repository root calculated from script location
             os.path.join(repo_root, 'for distribution case competition filtered_publications.csv'),
@@ -61,6 +67,10 @@ def load_original_publications():
             os.path.join(script_dir, '../for distribution case competition filtered_publications.csv'),
             os.path.join(script_dir, 'for distribution case competition filtered_publications.csv'),
             # Relative paths from current working directory
+            os.path.join(current_dir, '../../for distribution case competition filtered_publications.csv'),
+            os.path.join(current_dir, '../for distribution case competition filtered_publications.csv'),
+            os.path.join(current_dir, 'for distribution case competition filtered_publications.csv'),
+            # Simple relative paths
             '../../for distribution case competition filtered_publications.csv',
             '../for distribution case competition filtered_publications.csv',
             'for distribution case competition filtered_publications.csv',
@@ -69,9 +79,14 @@ def load_original_publications():
         csv_path = None
         for path in possible_paths:
             try:
+                # Try the path as-is
+                if os.path.exists(path):
+                    csv_path = path
+                    break
+                # Try absolute path
                 abs_path = os.path.abspath(path)
-                if os.path.exists(path) or os.path.exists(abs_path):
-                    csv_path = path if os.path.exists(path) else abs_path
+                if os.path.exists(abs_path):
+                    csv_path = abs_path
                     break
             except Exception:
                 continue
