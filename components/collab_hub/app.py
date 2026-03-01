@@ -79,39 +79,47 @@ def load_original_publications():
         csv_path = None
         for path in possible_paths:
             try:
+                # Normalize the path first
+                normalized_path = os.path.normpath(path)
                 # Try the path as-is
-                if os.path.exists(path):
-                    csv_path = path
+                if os.path.exists(normalized_path):
+                    csv_path = normalized_path
                     break
                 # Try absolute path
-                abs_path = os.path.abspath(path)
+                abs_path = os.path.abspath(normalized_path)
                 if os.path.exists(abs_path):
                     csv_path = abs_path
+                    break
+                # Try with realpath to resolve any symlinks
+                real_path = os.path.realpath(normalized_path)
+                if os.path.exists(real_path) and real_path != normalized_path:
+                    csv_path = real_path
                     break
             except Exception:
                 continue
         
-        # If still not found, try listing files in the repo root to debug
+        # If still not found, try listing files in the repo root to find it
         if csv_path is None:
             # Try to list files in repo root to see what's actually there
             try:
-                repo_files = []
                 for check_dir in [repo_root, current_dir, '/mount/src/sustainability_case_competition']:
                     try:
                         if os.path.exists(check_dir):
                             files = os.listdir(check_dir)
-                            csv_files = [f for f in files if f.endswith('.csv')]
+                            # Look for publications.csv specifically
+                            if 'publications.csv' in files:
+                                csv_path = os.path.join(check_dir, 'publications.csv')
+                                if os.path.exists(csv_path):
+                                    break
+                            # Also try any CSV file with 'publication' in the name
+                            csv_files = [f for f in files if f.endswith('.csv') and 'publication' in f.lower()]
                             if csv_files:
-                                repo_files.extend([os.path.join(check_dir, f) for f in csv_files])
-                    except:
+                                potential_path = os.path.join(check_dir, csv_files[0])
+                                if os.path.exists(potential_path):
+                                    csv_path = potential_path
+                                    break
+                    except Exception as e:
                         continue
-                
-                # Try to find the file by partial name match
-                for file_path in repo_files:
-                    if 'publications' in file_path.lower() or 'publication' in file_path.lower():
-                        if os.path.exists(file_path):
-                            csv_path = file_path
-                            break
             except:
                 pass
         
