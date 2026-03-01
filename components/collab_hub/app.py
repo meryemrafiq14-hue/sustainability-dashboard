@@ -337,13 +337,27 @@ if st.session_state.selected_path == "faculty":
     # Load data from original CSV (from repository)
     df = get_researcher_profiles_with_fallback()
     
-    # If still not found, show error with helpful message
+    # If still not found, show error with helpful message and debug info
     if df is None:
         st.error("❌ Original publications CSV file not found.")
+        
+        # Debug info (only show in development)
+        with st.expander("🔍 Debug Information", expanded=False):
+            st.code(f"""
+Current working directory: {os.getcwd()}
+App file location: {__file__}
+Checked paths:
+- /mount/src/sustainability_case_competition/for distribution case competition filtered_publications.csv
+- ../../for distribution case competition filtered_publications.csv
+- ../for distribution case competition filtered_publications.csv
+- for distribution case competition filtered_publications.csv
+            """)
+        
         st.info("""
         **The CSV file should be in the repository root directory:**
         - `for distribution case competition filtered_publications.csv`
-        - The file is now included in the GitHub repository for Streamlit Cloud access
+        - The file is included in the GitHub repository
+        - On Streamlit Cloud, it should be at: `/mount/src/sustainability_case_competition/for distribution case competition filtered_publications.csv`
         """)
         st.stop()
     
