@@ -2,7 +2,7 @@
 
 > **Component of the Illinois Sustainability Impact Engine Case Competition**
 
-The Collaboration Hub is one of 5 integrated components in the Sustainability Impact Engine. It is a rule-based matching system that recommends research collaborators based on topic alignment, method complementarity, and career stage fit.
+The Collaboration Hub is one of 5 integrated components in the Sustainability Impact Engine. It is a **supplementary compatibility scoring tool** that recommends research collaborators based on topic alignment, method complementarity, and career stage fit. It enhances the platform by adding a compatibility layer, but the core components (Sustainability Dashboard, Research Coverage Analysis, Impact Engine) work independently.
 
 ## 🎯 Quick Overview
 
@@ -11,6 +11,8 @@ The Collaboration Hub is one of 5 integrated components in the Sustainability Im
 **Key innovation**: Rewards **complementary methods** (e.g., Theoretical + Empirical) rather than just similarity.
 
 **Output**: Power BI dashboard showing ranked matches with transparent explanations.
+
+**Positioning**: **Supplementary tool** - A "nice-to-have" enhancement that adds compatibility scoring. The Sustainability Dashboard, Research Coverage Analysis, and Impact Engine work independently—the platform functions without the Hub, but it adds value when researchers want to find collaborators.
 
 **Part of**: The Illinois Sustainability Impact Engine (along with Sustainability Dashboard, Research Coverage Analysis, Impact Engine, and AI Prototype)
 
@@ -117,6 +119,22 @@ Every match includes:
 ## 📖 Documentation
 
 ### Core Documentation
+### Essential Reading
+
+- **`docs/END_TO_END_PIPELINE.md`** ⭐ - **Complete data journey from original CSV to Power BI MVP**
+  - What each script does
+  - What's real vs. simulated
+  - How it integrates with other components
+  - Power BI setup guide
+
+- **`docs/VALUE_PROPOSITION_AND_POSITIONING.md`** ⭐ - **How to sell the idea**
+  - Positioning as supplementary tool
+  - Value proposition for each stakeholder
+  - Integration with other components
+  - Elevator pitch and talking points
+
+### Detailed Documentation
+
 - **`docs/methodology.md`** - Complete step-by-step methodology
 - **`docs/BUSINESS_LOGIC_AND_DECISIONS.md`** - Business rationale for weights, decisions, and design choices
 - **`docs/DATA_TRANSFORMATION_GUIDE.md`** - Step-by-step data transformation from CSV to matches

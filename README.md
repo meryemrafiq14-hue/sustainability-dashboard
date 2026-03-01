@@ -95,9 +95,9 @@ The platform consists of **5 integrated components** working together to address
 
 ---
 
-### 3. Collaboration Hub 
+### 3. Collaboration Hub ⭐ (Supplementary Component)
 
-**AI-powered researcher matching system** that recommends collaborators based on:
+**Compatibility scoring tool** that recommends collaborators based on:
 - **Topic alignment** (SDG + keyword overlap) - 50% weight
 - **Method complementarity** (different methods score higher) - 35% weight
 - **Career stage fit** (mentorship + peer collaboration) - 15% weight
@@ -116,13 +116,17 @@ CCS_Total = (Topic × 50%) + (Method × 35%) + (Career × 15%)
 - ✅ Power BI dashboard with interactive filtering
 - ✅ Complete methodology documentation
 
+#### Positioning
+**Supplementary tool**: The Collaboration Hub is a "nice-to-have" enhancement that adds compatibility scoring to help researchers find collaborators. The Sustainability Dashboard, Research Coverage Analysis, and Impact Engine work independently—the platform functions without the Hub, but it adds value when researchers want to find collaborators.
+
 #### 📚 Complete Documentation
 **See `components/collab_hub/README.md`** for:
+- **End-to-end pipeline** - Complete data journey from CSV to Power BI
+- **Value proposition** - How to sell the idea and positioning
 - Step-by-step methodology
 - Script documentation
 - Power BI setup guide
 - Judge Q&A answers
-- Submission templates
 
 ---
 
