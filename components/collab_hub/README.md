@@ -104,6 +104,7 @@ components/collab_hub/
 
 ### Detailed Documentation
 - **`docs/methodology.md`** - Complete methodology (NLP formula, CCS scoring)
+- **`docs/UNDER_THE_HOOD.md`** ⭐ - Technical deep dive: How the Streamlit app works
 - **`docs/judge_qa.md`** - Answers to common judge questions
 - **`docs/limitations.md`** - Known limitations and future work
 
