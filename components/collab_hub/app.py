@@ -23,43 +23,60 @@ st.set_page_config(
 )
 
 # Dark theme CSS to match main site
-st.markdown("""
-<style>
-    /* Match main site dark theme */
-    .stApp {
-        background: linear-gradient(180deg, #0a1628 0%, #13294B 100%);
-    }
-    
-    /* Card styling to match main site */
-    .stContainer > div {
-        background: #1e3a5f;
-        border-radius: 12px;
-        padding: 1.5rem;
-    }
-    
-    /* Button styling */
-    .stButton > button {
-        background: #E84A27;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-    }
-    
-    .stButton > button:hover {
-        background: #c43a1f;
-    }
-    
-    /* Text colors */
-    h1, h2, h3 {
-        color: white !important;
-    }
-    
-    p, .stMarkdown {
-        color: #e0e0e0;
-    }
-</style>
-""", unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+        /* Match main site dark theme */
+        .stApp {
+            background: linear-gradient(180deg, #0a1628 0%, #13294B 100%);
+        }
+        
+        /* Card styling to match main site */
+        .stContainer > div {
+            background: #1e3a5f;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        /* Button styling - Enhanced */
+        .stButton > button {
+            background: linear-gradient(135deg, #E84A27 0%, #FF6B4A 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(232, 74, 39, 0.3);
+        }
+        
+        .stButton > button:hover {
+            background: linear-gradient(135deg, #c43a1f 0%, #E84A27 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(232, 74, 39, 0.4);
+        }
+        
+        /* Text colors */
+        h1, h2, h3 {
+            color: white !important;
+        }
+        
+        p, .stMarkdown {
+            color: #e0e0e0;
+        }
+        
+        /* Improved form styling */
+        .stSelectbox label, .stRadio label {
+            color: #fff !important;
+            font-weight: 600;
+        }
+        
+        /* Better spacing */
+        .main .block-container {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Cache the model loading to avoid reloading on every interaction
 @st.cache_resource
@@ -369,17 +386,91 @@ if st.session_state.selected_path is None:
     
     st.markdown("---")
     
-    # Three CTAs
-    st.markdown("## 🎯 Choose Your Path")
+    # Three CTAs - Improved Visual Design
+    st.markdown("""
+    <style>
+        .path-card {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2a4a6f 100%);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            height: 100%;
+            min-height: 280px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        .path-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+            border-color: #E84A27;
+        }
+        .path-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #E84A27, #FF6B4A);
+        }
+        .path-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .path-title {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+        }
+        .path-audience {
+            color: #E84A27;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 1rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .path-description {
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-top: 1rem;
+        }
+        .path-container {
+            display: flex;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        @media (max-width: 768px) {
+            .path-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns(3)
+    st.markdown("""
+    <div style='text-align: center; margin: 2rem 0;'>
+        <h2 style='color: #13294B; font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;'>Choose Your Path</h2>
+        <p style='color: #666; font-size: 1rem;'>Select the option that best describes your role</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3, gap="large")
     
     with col1:
         st.markdown("""
-        <div style='text-align: center; padding: 2rem; background: #1e3a5f; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 10px; height: 100%; min-height: 220px;'>
-            <h2 style='color: #13294B;'>🔬 Find a Collaborator</h2>
-            <p style='font-size: 1.1rem; margin: 1rem 0;'><strong>Faculty / Researchers</strong></p>
-            <p>I have a project; who is the best co-author for me?</p>
+        <div class="path-card">
+            <span class="path-icon">🔬</span>
+            <div class="path-title">Find a Collaborator</div>
+            <div class="path-audience">Faculty / Researchers</div>
+            <div class="path-description">I have a project; who is the best co-author for me?</div>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Get Started →", key="faculty_path", use_container_width=True, type="primary"):
@@ -388,10 +479,11 @@ if st.session_state.selected_path is None:
     
     with col2:
         st.markdown("""
-        <div style='text-align: center; padding: 2rem; background: #1e3a5f; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 10px; height: 100%; min-height: 220px;'>
-            <h2 style='color: #13294B;'>🎓 Find Opportunities</h2>
-            <p style='font-size: 1.1rem; margin: 1rem 0;'><strong>Students / Junior Faculty</strong></p>
-            <p>I have skills; what project needs me?</p>
+        <div class="path-card">
+            <span class="path-icon">🎓</span>
+            <div class="path-title">Find Opportunities</div>
+            <div class="path-audience">Students / Junior Faculty</div>
+            <div class="path-description">I have skills; what project needs me?</div>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Get Started →", key="student_path", use_container_width=True, type="primary"):
@@ -400,10 +492,11 @@ if st.session_state.selected_path is None:
     
     with col3:
         st.markdown("""
-        <div style='text-align: center; padding: 2rem; background: #1e3a5f; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 10px; height: 100%; min-height: 220px;'>
-            <h2 style='color: #13294B;'>💰 Sponsor a Priority</h2>
-            <p style='font-size: 1.1rem; margin: 1rem 0;'><strong>Partners & Donors</strong></p>
-            <p>I have money; where can I invest it to make the biggest impact?</p>
+        <div class="path-card">
+            <span class="path-icon">💰</span>
+            <div class="path-title">Sponsor a Priority</div>
+            <div class="path-audience">Partners & Donors</div>
+            <div class="path-description">I have resources; where can I invest to make the biggest impact?</div>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Get Started →", key="donor_path", use_container_width=True, type="primary"):
