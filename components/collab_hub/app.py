@@ -23,8 +23,8 @@ st.set_page_config(
 )
 
 # Dark theme CSS to match main site
-    st.markdown("""
-    <style>
+st.markdown("""
+<style>
         /* Match main site dark theme */
         .stApp {
             background: linear-gradient(180deg, #0a1628 0%, #13294B 100%);
