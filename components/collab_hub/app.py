@@ -903,8 +903,49 @@ CSV files found in directories:
                 st.markdown(f"**👤 Stage**: {top_match['stage']}")
             
             with col2:
-                if st.button("📧 Contact This Researcher", use_container_width=True, type="primary"):
-                    st.success(f"Email template ready for {top_match['name']}!")
+                # Create mailto link with pre-filled subject and body
+                researcher_email = top_match.get('email', '')
+                researcher_name = top_match.get('name', 'Researcher')
+                
+                if researcher_email and researcher_email != '':
+                    # Create email subject and body
+                    subject = f"Research Collaboration Opportunity - {researcher_name}"
+                    body = f"""Dear {researcher_name},
+
+I came across your research profile through the Sustainability Research Discovery Hub and noticed our research interests align well. I'm working on SDG {target_sdg} using {user_method} methodology, and I believe there could be valuable collaboration opportunities between us.
+
+I'd love to discuss potential collaboration. Would you be available for a brief conversation?
+
+Best regards"""
+                    
+                    # URL encode the email components
+                    import urllib.parse
+                    mailto_link = f"mailto:{researcher_email}?subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(body)}"
+                    
+                    # Use markdown link that opens email client
+                    st.markdown(f"""
+                    <a href="{mailto_link}" target="_blank" style="text-decoration: none; display: block;">
+                        <button style="
+                            background: linear-gradient(135deg, #E84A27 0%, #FF6B4A 100%);
+                            color: white;
+                            border: none;
+                            border-radius: 10px;
+                            padding: 0.75rem 1.5rem;
+                            font-weight: 600;
+                            font-size: 1rem;
+                            width: 100%;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 8px rgba(232, 74, 39, 0.3);
+                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(232, 74, 39, 0.4)';" 
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(232, 74, 39, 0.3)';">
+                            📧 Contact This Researcher
+                        </button>
+                    </a>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.warning("⚠️ Email not available for this researcher")
+                    st.info("Please use the email address shown above to contact them directly.")
             
             # Other top matches
             if len(matches_df) > 1:
