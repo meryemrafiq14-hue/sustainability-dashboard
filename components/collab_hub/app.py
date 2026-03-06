@@ -903,7 +903,7 @@ CSV files found in directories:
                 st.markdown(f"**👤 Stage**: {top_match['stage']}")
             
             with col2:
-                # Create mailto link with pre-filled subject and body
+                # Create Outlook Web App link with pre-filled subject and body
                 researcher_email = top_match.get('email', '')
                 researcher_name = top_match.get('name', 'Researcher')
                 
@@ -918,13 +918,18 @@ I'd love to discuss potential collaboration. Would you be available for a brief 
 
 Best regards"""
                     
-                    # URL encode the email components
+                    # URL encode the email components for Outlook Web App
                     import urllib.parse
-                    mailto_link = f"mailto:{researcher_email}?subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(body)}"
+                    to_param = urllib.parse.quote(researcher_email)
+                    subject_param = urllib.parse.quote(subject)
+                    body_param = urllib.parse.quote(body)
                     
-                    # Use markdown link that opens email client
+                    # Outlook Web App compose URL
+                    outlook_link = f"https://outlook.office.com/mail/deeplink/compose?to={to_param}&subject={subject_param}&body={body_param}"
+                    
+                    # Use markdown link that opens Outlook in a new tab
                     st.markdown(f"""
-                    <a href="{mailto_link}" target="_blank" style="text-decoration: none; display: block;">
+                    <a href="{outlook_link}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: block;">
                         <button style="
                             background: linear-gradient(135deg, #E84A27 0%, #FF6B4A 100%);
                             color: white;
