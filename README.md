@@ -2,7 +2,7 @@
 
 > **AI-powered sustainability research intelligence for the Gies College of Business, University of Illinois Urbana-Champaign**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-prattkk11.github.io-brightgreen?style=flat-square)](https://prattkk11.github.io/sustainability-dashboard/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-agatafietko.github.io-brightgreen?style=flat-square)](https://agatafietko.github.io/sustainability-dashboard/)
 [![HTML](https://img.shields.io/badge/Built%20with-HTML%2FJS-orange?style=flat-square)](#)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](#license)
 
@@ -18,7 +18,7 @@ Under the hood, it runs a two-stage AI classification pipeline: LLMs handle rele
 
 ## Live Demo
 
-**[prattkk11.github.io/sustainability-dashboard](https://prattkk11.github.io/sustainability-dashboard/)**
+**[agatafietko.github.io/sustainability-dashboard](https://agatafietko.github.io/sustainability-dashboard/)**
 
 ---
 
