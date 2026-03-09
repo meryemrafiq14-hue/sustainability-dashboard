@@ -1178,6 +1178,113 @@ elif st.session_state.selected_path == "donor":
         if len(sdg_researchers) > 0:
             for idx, researcher in sdg_researchers.iterrows():
                 st.markdown(f"**{researcher.get('name', 'Unknown')}** - {researcher.get('department', 'Unknown')} ({int(researcher.get('total_publications', 0))} publications)")
+        
+        # Contact section for sustainability/funding inquiries
+        st.markdown("---")
+        st.markdown("## 📧 Get in Touch")
+        st.markdown("**Ready to make an impact? Contact our sustainability team to discuss funding opportunities:**")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+            <div style='background: #1e3a5f; padding: 1.5rem; border-radius: 10px; border-left: 4px solid #E84A27;'>
+                <h3 style='color: #E84A27; margin-top: 0;'>Sustainability Office</h3>
+                <p style='color: #e0e0e0; margin-bottom: 0.5rem;'><strong>Email:</strong> sustainability@illinois.edu</p>
+                <p style='color: #e0e0e0; margin-bottom: 0.5rem;'><strong>Phone:</strong> (217) 333-0000</p>
+                <p style='color: #e0e0e0; margin-bottom: 0;'><strong>Focus:</strong> Strategic funding and sustainability initiatives</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Contact button for sustainability office
+            import urllib.parse
+            sustainability_email = "sustainability@illinois.edu"
+            subject = "Funding Inquiry - Sustainability Research"
+            body = """Dear Sustainability Office,
+
+I'm interested in discussing funding opportunities for sustainability research at the University of Illinois. I've reviewed the research coverage analysis and would like to learn more about how I can support priority areas.
+
+Thank you for your time.
+
+Best regards"""
+            
+            to_param = urllib.parse.quote(sustainability_email)
+            subject_param = urllib.parse.quote(subject)
+            body_param = urllib.parse.quote(body)
+            outlook_link = f"https://outlook.office.com/mail/deeplink/compose?to={to_param}&subject={subject_param}&body={body_param}"
+            
+            st.markdown(f"""
+            <a href="{outlook_link}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: block; margin-top: 1rem;">
+                <button style="
+                    background: linear-gradient(135deg, #E84A27 0%, #FF6B4A 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    padding: 0.75rem 1.5rem;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    width: 100%;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 8px rgba(232, 74, 39, 0.3);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(232, 74, 39, 0.4)';" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(232, 74, 39, 0.3)';">
+                    📧 Contact Sustainability Office
+                </button>
+            </a>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown("""
+            <div style='background: #1e3a5f; padding: 1.5rem; border-radius: 10px; border-left: 4px solid #13294B;'>
+                <h3 style='color: #13294B; margin-top: 0;'>Research Development Office</h3>
+                <p style='color: #e0e0e0; margin-bottom: 0.5rem;'><strong>Email:</strong> research@illinois.edu</p>
+                <p style='color: #e0e0e0; margin-bottom: 0.5rem;'><strong>Phone:</strong> (217) 333-0001</p>
+                <p style='color: #e0e0e0; margin-bottom: 0;'><strong>Focus:</strong> Research partnerships and grants</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Contact button for research office
+            research_email = "research@illinois.edu"
+            subject_research = "Research Partnership Inquiry"
+            body_research = """Dear Research Development Office,
+
+I'm interested in establishing a research partnership or funding opportunity with the University of Illinois. I've reviewed the sustainability research landscape and would like to discuss potential collaborations.
+
+Thank you for your time.
+
+Best regards"""
+            
+            to_param_research = urllib.parse.quote(research_email)
+            subject_param_research = urllib.parse.quote(subject_research)
+            body_param_research = urllib.parse.quote(body_research)
+            outlook_link_research = f"https://outlook.office.com/mail/deeplink/compose?to={to_param_research}&subject={subject_param_research}&body={body_param_research}"
+            
+            st.markdown(f"""
+            <a href="{outlook_link_research}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: block; margin-top: 1rem;">
+                <button style="
+                    background: linear-gradient(135deg, #13294B 0%, #1e3a5f 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    padding: 0.75rem 1.5rem;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    width: 100%;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 8px rgba(19, 41, 75, 0.3);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(19, 41, 75, 0.4)';" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(19, 41, 75, 0.3)';">
+                    📧 Contact Research Office
+                </button>
+            </a>
+            """, unsafe_allow_html=True)
+        
+        st.info("""
+        💡 **Next Steps**: Use the contact buttons above to reach out directly, or review the priority funding areas 
+        to identify specific SDGs where your investment will have the greatest impact.
+        """)
 
 
 # Footer
