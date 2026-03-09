@@ -222,7 +222,6 @@ function generateStrategicSnapshot(selectedSDG){
   ];
 }
 
-// ── Strategic Recommendations with bullet + rationale structure ──
 function generateRecommendations(selectedSDG){
   if(selectedSDG){
     const id=selectedSDG;
@@ -319,7 +318,6 @@ function ShimmerBlock({lines=3}){
   );
 }
 
-// ── SDG Wheel — UPGRADED: ~12% larger (360x360), focal visual anchor ──
 function SDGWheel({selected,onToggle,showGlobal}){
   const cx=180,cy=180,ir=76,r=162,sweep=(2*Math.PI)/17;
   const total=Object.values(SDG_COUNTS).reduce((a,b)=>a+b,0);
@@ -386,7 +384,6 @@ function SDGWheel({selected,onToggle,showGlobal}){
   );
 }
 
-// ── WORLD MAP — D3 Natural Earth projection + TopoJSON ───────
 function WorldMap(){
   const containerRef=React.useRef(null);
   const svgRef=React.useRef(null);
@@ -412,124 +409,45 @@ function WorldMap(){
   function renderMap(countries,borders){
     const svg=d3.select(svgRef.current);
     svg.selectAll("*").remove();
-
-    // --- Natural Earth projection, fitted to viewBox ---
     const projection=d3.geoNaturalEarth1()
       .fitSize([W-40,H-40],countries)
       .translate([W/2,H/2]);
     const path=d3.geoPath(projection);
-
-    // --- Defs: glow filter for hovered bubbles ---
     const defs=svg.append("defs");
     const filt=defs.append("filter").attr("id","mapGlow");
     filt.append("feGaussianBlur").attr("in","SourceGraphic").attr("stdDeviation","3").attr("result","blur");
     const merge=filt.append("feMerge");
     merge.append("feMergeNode").attr("in","blur");
     merge.append("feMergeNode").attr("in","SourceGraphic");
-
-    // --- Sphere outline (ocean) ---
-    svg.append("path")
-      .datum({type:"Sphere"})
-      .attr("d",path)
-      .attr("fill","#FAFBFC")
-      .attr("stroke","#E2E8F0")
-      .attr("stroke-width",0.8);
-
-    // --- Country fills ---
-    svg.append("g")
-      .selectAll("path")
-      .data(countries.features)
-      .join("path")
-      .attr("d",path)
-      .attr("fill","#E5E7EB")
-      .attr("class","map-country");
-
-    // --- Internal borders ---
-    svg.append("path")
-      .datum(borders)
-      .attr("d",path)
-      .attr("fill","none")
-      .attr("stroke","#D1D5DB")
-      .attr("stroke-width",0.5)
-      .attr("stroke-linejoin","round");
-
-    // --- Research bubbles ---
+    svg.append("path").datum({type:"Sphere"}).attr("d",path).attr("fill","#FAFBFC").attr("stroke","#E2E8F0").attr("stroke-width",0.8);
+    svg.append("g").selectAll("path").data(countries.features).join("path").attr("d",path).attr("fill","#E5E7EB").attr("class","map-country");
+    svg.append("path").datum(borders).attr("d",path).attr("fill","none").attr("stroke","#D1D5DB").attr("stroke-width",0.5).attr("stroke-linejoin","round");
     const max=Math.max(...Object.values(COUNTRY_DATA).map(d=>d.count));
     const entries=Object.entries(COUNTRY_DATA).sort((a,b)=>a[1].count-b[1].count);
-
     const bubbleG=svg.append("g").attr("class","map-bubbles");
-
     entries.forEach(([name,{lat,lng,count}])=>{
       const [cx,cy]=projection([lng,lat]);
       if(cx==null||cy==null)return;
       const r=6+(count/max)*14;
-
       const g=bubbleG.append("g").attr("class","map-bubble");
-
-      // Outer glow ring
-      g.append("circle")
-        .attr("class","bubble-outer")
-        .attr("cx",cx).attr("cy",cy).attr("r",r*2)
-        .attr("fill","#e85d26").attr("opacity",0.06);
-
-      // Main circle
-      g.append("circle")
-        .attr("class","bubble-inner")
-        .attr("cx",cx).attr("cy",cy).attr("r",r)
-        .attr("fill","#e85d26")
-        .attr("stroke","#fff").attr("stroke-width",1.5);
-
-      // Count label
-      g.append("text")
-        .attr("x",cx).attr("y",cy+0.5)
-        .attr("text-anchor","middle")
-        .attr("dominant-baseline","central")
-        .attr("fill","#fff")
-        .attr("font-size",r>13?11:9)
-        .attr("font-weight",700)
-        .attr("font-family","system-ui,-apple-system,sans-serif")
-        .attr("pointer-events","none")
-        .text(count);
-
-      // Tooltip group (hidden by default via CSS)
+      g.append("circle").attr("class","bubble-outer").attr("cx",cx).attr("cy",cy).attr("r",r*2).attr("fill","#e85d26").attr("opacity",0.06);
+      g.append("circle").attr("class","bubble-inner").attr("cx",cx).attr("cy",cy).attr("r",r).attr("fill","#e85d26").attr("stroke","#fff").attr("stroke-width",1.5);
+      g.append("text").attr("x",cx).attr("y",cy+0.5).attr("text-anchor","middle").attr("dominant-baseline","central").attr("fill","#fff").attr("font-size",r>13?11:9).attr("font-weight",700).attr("font-family","system-ui,-apple-system,sans-serif").attr("pointer-events","none").text(count);
       const tip=g.append("g").attr("class","map-tooltip");
       const label=`${name}  ·  ${count} papers`;
       const tw=label.length*6.2+22;
       const tx=cx+r+8,ty=cy;
-
-      // Flip tooltip left if it would overflow right edge
       const flipLeft=tx+tw>W-10;
       const finalX=flipLeft?cx-r-8-tw:tx;
-
-      tip.append("rect")
-        .attr("x",finalX).attr("y",ty-14)
-        .attr("width",tw).attr("height",28)
-        .attr("rx",6)
-        .attr("fill","#0F172A").attr("opacity",0.92);
-      tip.append("text")
-        .attr("x",finalX+11).attr("y",ty+1)
-        .attr("fill","#fff")
-        .attr("font-size",11)
-        .attr("font-weight",600)
-        .attr("font-family","system-ui,-apple-system,sans-serif")
-        .attr("dominant-baseline","central")
-        .text(label);
+      tip.append("rect").attr("x",finalX).attr("y",ty-14).attr("width",tw).attr("height",28).attr("rx",6).attr("fill","#0F172A").attr("opacity",0.92);
+      tip.append("text").attr("x",finalX+11).attr("y",ty+1).attr("fill","#fff").attr("font-size",11).attr("font-weight",600).attr("font-family","system-ui,-apple-system,sans-serif").attr("dominant-baseline","central").text(label);
     });
   }
 
   return (
     <div ref={containerRef} style={{borderRadius:10,overflow:"hidden",background:"#FAFBFC",border:"1px solid #E5E7EB"}}>
-      {error?(
-        <div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:12}}>Unable to load map data.</div>
-      ):!ready?(
-        <div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:12,gap:8}}>
-          <svg width="16" height="16" viewBox="0 0 16 16" style={{animation:"sdg-spin 1s linear infinite"}}><circle cx="8" cy="8" r="6" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="28" strokeDashoffset="8"/></svg>
-          Loading map…
-        </div>
-      ):null}
-      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
-        style={{display:ready?"block":"none",width:"100%"}}
-        preserveAspectRatio="xMidYMid meet"/>
+      {error?(<div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:12}}>Unable to load map data.</div>):!ready?(<div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:12,gap:8}}><svg width="16" height="16" viewBox="0 0 16 16" style={{animation:"sdg-spin 1s linear infinite"}}><circle cx="8" cy="8" r="6" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="28" strokeDashoffset="8"/></svg>Loading map…</div>):null}
+      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{display:ready?"block":"none",width:"100%"}} preserveAspectRatio="xMidYMid meet"/>
     </div>
   );
 }
@@ -556,13 +474,7 @@ function GapClosurePanel({selectedSDG}){
   return (
     <div className="fadein" style={{marginTop:8,padding:"7px 11px",background:closure.type==="under"?"#fef2f2":"#f0fdf4",borderRadius:7,border:`1px solid ${closure.type==="under"?"#fecaca":"#bbf7d0"}`}}>
       <div style={{fontSize:9,fontWeight:700,color:closure.type==="under"?"#991b1b":"#166534",textTransform:"uppercase",letterSpacing:.8,marginBottom:2}}>Gap Closure</div>
-      {closure.type==="under"?(
-        <div style={{fontSize:11,color:"#7f1d1d",lineHeight:1.5}}>Requires <strong>+{closure.required} papers</strong> to match global share.</div>
-      ):closure.type==="over"?(
-        <div style={{fontSize:11,color:"#14532d",lineHeight:1.5}}>Exceeds benchmark by <strong>{closure.excess} papers</strong>.</div>
-      ):(
-        <div style={{fontSize:11,color:"#6b7280"}}>Aligned with global benchmark.</div>
-      )}
+      {closure.type==="under"?(<div style={{fontSize:11,color:"#7f1d1d",lineHeight:1.5}}>Requires <strong>+{closure.required} papers</strong> to match global share.</div>):closure.type==="over"?(<div style={{fontSize:11,color:"#14532d",lineHeight:1.5}}>Exceeds benchmark by <strong>{closure.excess} papers</strong>.</div>):(<div style={{fontSize:11,color:"#6b7280"}}>Aligned with global benchmark.</div>)}
     </div>
   );
 }
@@ -662,11 +574,8 @@ function App(){
   const [personaView,setPersonaView]=useState("donor");
   const [selectedPairing,setSelectedPairing]=useState(null);
   const [showWeightInfo,setShowWeightInfo]=useState(false);
-  // ── Refinement 1: Snapshot expand/collapse ──
   const [snapshotExpanded,setSnapshotExpanded]=useState(false);
-  // ── Refinement 2: Recommendation rationale toggles ──
   const [expandedRec,setExpandedRec]=useState(null);
-  // ── Refinement 5: AI chat collapsed by default ──
   const [chatOpen,setChatOpen]=useState(false);
 
   const toggleSDG=id=>{
@@ -686,10 +595,7 @@ function App(){
 
   const filteredDepts=useMemo(()=>{
     if(selSDGs.length===0) return DEPT_DATA;
-    return DEPT_DATA.map(d=>({...d,
-      c:selSDGs.some(s=>d.sdgs.includes(s))?d.c:Math.round(d.c*0.12),
-      dim:!selSDGs.some(s=>d.sdgs.includes(s))
-    }));
+    return DEPT_DATA.map(d=>({...d,c:selSDGs.some(s=>d.sdgs.includes(s))?d.c:Math.round(d.c*0.12),dim:!selSDGs.some(s=>d.sdgs.includes(s))}));
   },[selSDGs]);
   const filteredResearchers=useMemo(()=>{
     if(selSDGs.length===0) return RESEARCHERS;
@@ -722,13 +628,14 @@ function App(){
     if(view==="student") setTab("network"); else setTab("overview");
   };
 
-  const TABS=[{id:"overview",label:"Overview"},{id:"network",label:"Network"},{id:"globalimpact",label:"Global Impact"},{id:"personas",label:"Who Uses This"}];
+  // ── TABS: Collaboration Hub inserted between Global Impact and Who Uses This ──
+  const TABS=[{id:"overview",label:"Overview"},{id:"network",label:"Network"},{id:"globalimpact",label:"Global Impact"},{id:"collab",label:"Collaboration Hub"},{id:"personas",label:"Who Uses This"}];
+
   const NET_NODES=[{dept:"Business Admin",x:280,y:160,c:250},{dept:"Finance",x:430,y:100,c:121},{dept:"Accountancy",x:440,y:250,c:34},{dept:"Gies Affiliates",x:150,y:200,c:21}];
   const NET_LINKS=[["Business Admin","Finance"],["Business Admin","Accountancy"],["Finance","Accountancy"],["Business Admin","Gies Affiliates"]];
   const KW_COLORS=["#e85d26","#3F7E44","#0A97D9","#DDA63A","#DD1367","#FD6925","#A21942","#26BDE2"];
   const KW_MAX=Math.max(...KEYWORDS.map(k=>k.count));
 
-  // ── Executive style tokens ──
   const S={
     card:{background:"white",borderRadius:8,padding:10,boxShadow:"0 1px 3px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.02)",border:"1px solid #eef2f7"},
     label:{fontSize:8,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1},
@@ -775,8 +682,6 @@ function App(){
         {/* ═══════════ OVERVIEW ═══════════ */}
         {tab==="overview"&&(
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
-
-            {/* ── Persona banner ── */}
             {personaView==="donor"&&(
               <div className="fadein" style={{background:"linear-gradient(135deg,#fffbeb,#fef3c7)",borderRadius:6,padding:"5px 12px",border:"1px solid #fde68a",display:"flex",alignItems:"center",gap:6}}>
                 <span style={{fontSize:11}}>🎯</span>
@@ -786,8 +691,6 @@ function App(){
                 </div>
               </div>
             )}
-
-            {/* ── KPI Row ── */}
             <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6}}>
               {[
                 {label:personaView==="donor"?"Research Output":"Total Publications",val:"2,022",sub:"Indexed Gies papers",color:"#0a1628"},
@@ -803,13 +706,8 @@ function App(){
                 </div>
               ))}
             </div>
-
-            {/* ═══ SDG WHEEL — 3-COLUMN COMMAND CENTER ═══ */}
             <div style={{display:"grid",gridTemplateColumns:"1fr 2fr 1fr",gap:6,alignItems:"start"}}>
-
-              {/* ── LEFT PANEL: SDG Insight Cards ── */}
               <div style={{display:"flex",flexDirection:"column",gap:4}}>
-                {/* Dynamic insight: selected or default */}
                 {(()=>{
                   const topSDG=OVER_INDEXED[0];
                   const gapSDG=UNDER_INDEXED[0];
@@ -819,13 +717,10 @@ function App(){
                   const selGap=selId?GAP_INDEX[selId]:null;
                   return (
                     <>
-                      {/* Section header */}
                       <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:0}}>
                         <div style={{width:4,height:4,borderRadius:"50%",background:"#6366f1"}}/>
                         <div style={{fontWeight:800,fontSize:12,color:"#0f172a",letterSpacing:"-.2px"}}>SDG Intelligence</div>
                       </div>
-
-                      {/* Selected SDG detail card */}
                       {selId?(
                         <div className="fadein" style={{background:"linear-gradient(135deg,#0a1628,#162544)",borderRadius:8,padding:"8px 9px",display:"flex",flexDirection:"column",gap:5}}>
                           <div style={{display:"flex",alignItems:"center",gap:7}}>
@@ -854,57 +749,30 @@ function App(){
                           <button onClick={clearSDG} style={{marginTop:4,fontSize:10,padding:"6px 0",borderRadius:8,background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",color:"#94a3b8",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Clear filter ✕</button>
                         </div>
                       ):(
-                        /* Default state: summary cards */
                         <div style={{display:"flex",flexDirection:"column",gap:3}}>
                           <div style={{...S.card,padding:"6px 8px",display:"flex",flexDirection:"column",gap:3}}>
-                            <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:"#f0fdf4",borderRadius:5,border:"1px solid #d1fae5"}}>
-                              <span style={{fontSize:9}}>🟢</span>
-                              <div style={{flex:1}}>
-                                <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Top SDG</div>
-                                <div style={{fontSize:12,fontWeight:800,color:"#16a34a"}}>SDG {topSDG.id}: {SDG_META[topSDG.id].name}</div>
+                            {[
+                              {icon:"🟢",bg:"#f0fdf4",border:"#d1fae5",label:"Top SDG",id:topSDG.id,val:`+${topSDG.gap}pp`,valColor:"#16a34a"},
+                              {icon:"🔴",bg:"#fef2f2",border:"#fecaca",label:"Largest Gap",id:gapSDG.id,val:`${gapSDG.gap}pp`,valColor:"#dc2626"},
+                              {icon:"🔵",bg:"#f8fafc",border:"#eef2f7",label:"Sustainability Rate",customVal:"21.1%",customSub:"of 2,022",valColor:"#0a1628"},
+                              {icon:"📊",bg:"#f8fafc",border:"#eef2f7",label:"SDGs Covered",customVal:"15 of 17",customSub:"2 at zero",valColor:"#0a1628",subColor:"#ef4444"},
+                              {icon:"📈",bg:"#fefce8",border:"#fde68a",label:"Growth (2010–2020)",customVal:"+347%",customSub:"trend",valColor:"#b45309"}
+                            ].map((item,i)=>(
+                              <div key={i} style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:item.bg,borderRadius:5,border:`1px solid ${item.border}`}}>
+                                <span style={{fontSize:9}}>{item.icon}</span>
+                                <div style={{flex:1}}>
+                                  <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>{item.label}</div>
+                                  <div style={{fontSize:12,fontWeight:800,color:item.valColor}}>{item.customVal||`SDG ${item.id}: ${SDG_META[item.id]?.name}`}</div>
+                                </div>
+                                <span style={{fontSize:item.customSub?9:10,fontWeight:800,color:item.subColor||item.valColor}}>{item.customSub||item.val}</span>
                               </div>
-                              <span style={{fontSize:10,fontWeight:800,color:"#16a34a"}}>+{topSDG.gap}pp</span>
-                            </div>
-                            <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:"#fef2f2",borderRadius:5,border:"1px solid #fecaca"}}>
-                              <span style={{fontSize:9}}>🔴</span>
-                              <div style={{flex:1}}>
-                                <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Largest Gap</div>
-                                <div style={{fontSize:12,fontWeight:800,color:"#dc2626"}}>SDG {gapSDG.id}: {SDG_META[gapSDG.id].name}</div>
-                              </div>
-                              <span style={{fontSize:10,fontWeight:800,color:"#dc2626"}}>{gapSDG.gap}pp</span>
-                            </div>
-                            <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:"#f8fafc",borderRadius:5,border:"1px solid #eef2f7"}}>
-                              <span style={{fontSize:9}}>🔵</span>
-                              <div style={{flex:1}}>
-                                <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Sustainability Rate</div>
-                                <div style={{fontSize:12,fontWeight:800,color:"#0a1628"}}>21.1%</div>
-                              </div>
-                              <span style={{fontSize:9,color:"#94a3b8"}}>of 2,022</span>
-                            </div>
-                            <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:"#f8fafc",borderRadius:5,border:"1px solid #eef2f7"}}>
-                              <span style={{fontSize:9}}>📊</span>
-                              <div style={{flex:1}}>
-                                <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>SDGs Covered</div>
-                                <div style={{fontSize:12,fontWeight:800,color:"#0a1628"}}>15 of 17</div>
-                              </div>
-                              <span style={{fontSize:9,color:"#ef4444",fontWeight:600}}>2 at zero</span>
-                            </div>
-                            <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:"#fefce8",borderRadius:5,border:"1px solid #fde68a"}}>
-                              <span style={{fontSize:9}}>📈</span>
-                              <div style={{flex:1}}>
-                                <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Growth (2010–2020)</div>
-                                <div style={{fontSize:12,fontWeight:800,color:"#b45309"}}>+347%</div>
-                              </div>
-                              <span style={{fontSize:9,color:"#94a3b8"}}>trend</span>
-                            </div>
+                            ))}
                           </div>
                         </div>
                       )}
                     </>
                   );
                 })()}
-
-                {/* ── Departments (merged from analytics) ── */}
                 <div style={S.card}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
                     <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Papers by Department</div>
@@ -925,7 +793,6 @@ function App(){
                     );
                   })}
                 </div>
-                {/* ── Researchers ── */}
                 <div style={S.card}>
                   <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:5}}>{selSDGs.length>0?`Researchers: SDG ${selSDGs.join(", ")}`:`Top Researchers`}</div>
                   {(selSDGs.length>0?filteredResearchers:RESEARCHERS.slice(0,5)).map((r,i,a)=>(
@@ -939,8 +806,6 @@ function App(){
                     </div>
                   ))}
                 </div>
-
-                {/* ── Strategic Snapshot (fills whitespace) ── */}
                 <div style={{background:"linear-gradient(135deg,#0a1628 0%,#162544 100%)",borderRadius:8,padding:"10px 12px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
                     <div style={{width:20,height:20,borderRadius:6,background:"linear-gradient(135deg,#6366f1,#4f46e5)",display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -972,10 +837,8 @@ function App(){
                 </div>
               </div>
 
-              {/* ── CENTER PANEL: SDG Wheel + Keywords + Trend ── */}
               <div style={{display:"flex",flexDirection:"column",gap:4}}>
                 <div style={{...S.card,padding:"6px 10px",display:"flex",flexDirection:"column",alignItems:"center",position:"relative",overflow:"hidden"}}>
-                  {/* Subtle outer glow */}
                   <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:"90%",height:"90%",borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,.04) 0%,transparent 70%)",pointerEvents:"none"}}/>
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",marginBottom:2,position:"relative",zIndex:1}}>
                     <div>
@@ -991,7 +854,6 @@ function App(){
                   <div style={{width:"100%",maxWidth:500,aspectRatio:"1",position:"relative",zIndex:1}}>
                     <SDGWheel selected={selSDGs} onToggle={toggleSDG} showGlobal={showGlobal}/>
                   </div>
-                  {/* Active filter strip */}
                   {selSDGs.length>0?(
                     <div className="fadein" style={{width:"100%",background:"linear-gradient(135deg,#0a1628,#1e3a5f)",borderRadius:6,padding:"5px 10px",textAlign:"center",marginTop:2,position:"relative",zIndex:1}}>
                       <div style={{display:"flex",flexWrap:"wrap",gap:4,justifyContent:"center",marginBottom:2}}>
@@ -1003,7 +865,6 @@ function App(){
                     <div style={{fontSize:9,color:"#94a3b8",fontStyle:"italic",marginTop:2,position:"relative",zIndex:1}}>Click any SDG to dynamically filter insights</div>
                   )}
                 </div>
-                {/* ── Keywords ── */}
                 <div style={S.card}>
                   <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:5}}>{selSDGs.length>0?"Relevant Keywords":"Research Keywords"}</div>
                   {filteredKeywords.length>0?(
@@ -1014,7 +875,6 @@ function App(){
                     </div>
                   ):(<p style={{fontSize:11,color:"#94a3b8",fontStyle:"italic"}}>No keywords match selected SDGs</p>)}
                 </div>
-                {/* ── Trend ── */}
                 <div style={S.card}>
                   <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:1}}>Publication Trend</div>
                   <div style={{fontSize:9,color:"#16a34a",fontWeight:600,marginBottom:5}}>+347% growth · 2010–2020</div>
@@ -1029,14 +889,12 @@ function App(){
                 </div>
               </div>
 
-              {/* ── RIGHT PANEL: Gap & Benchmark Index ── */}
               <div style={{display:"flex",flexDirection:"column",gap:4}}>
                 <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:0}}>
                   <div style={{width:3,height:3,borderRadius:"50%",background:"#ef4444"}}/>
                   <div style={{fontWeight:800,fontSize:11,color:"#0f172a",letterSpacing:"-.2px"}}>Gap & Coverage</div>
                   <span style={S.aiTag}>benchmarking</span>
                 </div>
-
                 {selSDGs.length===1?(
                   <div className="fadein" style={{...S.card,padding:"8px 9px"}}>
                     <div style={{fontSize:9,fontWeight:700,color:GAP_INDEX[selSDGs[0]]<0?"#ef4444":"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:4}}>SDG {selSDGs[0]}: {SDG_META[selSDGs[0]].name}</div>
@@ -1079,8 +937,6 @@ function App(){
                     <button onClick={()=>setTab("globalimpact")} style={{marginTop:6,width:"100%",fontSize:10,padding:"6px 0",borderRadius:8,background:"#0a1628",border:"none",color:"white",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Full Gap Analysis →</button>
                   </div>
                 )}
-
-                {/* ── Gap Index vs Global (merged from analytics) ── */}
                 <div style={S.card}>
                   <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5}}>
                     <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Gap Index vs. Global</div>
@@ -1102,8 +958,6 @@ function App(){
                   )}
                   <button onClick={()=>setTab("globalimpact")} style={{marginTop:6,width:"100%",fontSize:11,padding:"7px 0",borderRadius:8,background:"#0a1628",border:"none",color:"white",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Full Gap Analysis →</button>
                 </div>
-
-                {/* ── Strategic Recommendations (fills whitespace) ── */}
                 <div style={{...S.card,background:"#fafdfb",border:"1px solid #d1fae5",padding:"10px 12px",display:"flex",flexDirection:"column"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
                     <div style={{width:20,height:20,borderRadius:6,background:"#16a34a",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
@@ -1134,7 +988,6 @@ function App(){
                 </div>
               </div>
             </div>
-
           </div>
         )}
 
@@ -1327,6 +1180,97 @@ function App(){
           </div>
         )}
 
+        {/* ═══════════ COLLABORATION HUB ═══════════ */}
+        {tab==="collab"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:8}} className="view-transition">
+
+            {/* Header */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
+              <div>
+                <div style={{fontWeight:900,fontSize:17,color:"#0f172a",letterSpacing:"-.3px"}}>Collaboration Hub</div>
+                <p style={{fontSize:11,color:"#64748b",marginTop:2,maxWidth:560}}>
+                  Connect Gies sustainability research with external partners, case competitions, and sponsorship opportunities.
+                  Powered by the <strong>Sustainability Case Competition</strong> portal.
+                </p>
+              </div>
+              <a href="https://sustainabilitycasecompetition-hmdgpbamcag9wrotla87c4.streamlit.app/#sponsor-a-priority"
+                target="_blank" rel="noopener noreferrer"
+                style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 16px",borderRadius:8,background:"#0a1628",color:"white",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0}}>
+                Open full screen ↗
+              </a>
+            </div>
+
+            {/* Quick-jump pills */}
+            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+              {[
+                {label:"Sponsor a Priority",anchor:"#sponsor-a-priority",color:"#e85d26"},
+                {label:"SDG Gaps",anchor:"#sdg-gaps",color:"#3F7E44"},
+                {label:"Research Partnerships",anchor:"#research-partnerships",color:"#0A97D9"},
+                {label:"Case Competition",anchor:"#case-competition",color:"#6366f1"},
+              ].map(p=>(
+                <a key={p.label}
+                  href={`https://sustainabilitycasecompetition-hmdgpbamcag9wrotla87c4.streamlit.app/${p.anchor}`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{fontSize:10,fontWeight:600,padding:"5px 13px",borderRadius:20,color:"white",background:p.color}}>
+                  {p.label}
+                </a>
+              ))}
+            </div>
+
+            {/* Context strip */}
+            <div style={{background:"linear-gradient(135deg,#eff6ff,#dbeafe)",borderRadius:8,padding:"8px 14px",border:"1px solid #bfdbfe",display:"flex",alignItems:"flex-start",gap:10}}>
+              <span style={{fontSize:16,flexShrink:0}}>🔗</span>
+              <div style={{fontSize:10,color:"#1e40af",lineHeight:1.6}}>
+                <strong>How this connects:</strong> The portal below surfaces SDG sponsorship priorities sourced from the same gap analysis powering this dashboard.
+                Gies under-indexed SDGs (SDG 14, 15, 2) map directly to open sponsorship tracks.
+                Use the <strong>Overview tab</strong> to identify gaps, then come here to match them with funding opportunities.
+              </div>
+            </div>
+
+            {/* Iframe embed */}
+            <div style={{...S.card,padding:0,overflow:"hidden"}}>
+              {/* Browser-chrome bar */}
+              <div style={{background:"#0a1628",padding:"8px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <div style={{display:"flex",gap:5}}>
+                    <div style={{width:8,height:8,borderRadius:"50%",background:"#ef4444"}}/>
+                    <div style={{width:8,height:8,borderRadius:"50%",background:"#fbbf24"}}/>
+                    <div style={{width:8,height:8,borderRadius:"50%",background:"#4ade80"}}/>
+                  </div>
+                  <span style={{color:"#64748b",fontSize:10,marginLeft:6,fontFamily:"monospace"}}>sustainabilitycasecompetition · streamlit.app</span>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:5}}>
+                  <div className="pulse-dot" style={{width:5,height:5,borderRadius:"50%",background:"#4ade80"}}/>
+                  <span style={{color:"#4ade80",fontSize:9,fontWeight:600}}>Live</span>
+                </div>
+              </div>
+              <iframe
+                src="https://sustainabilitycasecompetition-hmdgpbamcag9wrotla87c4.streamlit.app/?embed=true"
+                style={{width:"100%",height:720,border:"none",display:"block"}}
+                title="Sustainability Case Competition Portal"
+                allow="clipboard-write"
+                loading="lazy"
+              />
+            </div>
+
+            {/* Context cards */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+              {[
+                {icon:"🎯",title:"Sponsor a Priority",body:"Match your funding to Gies' most under-indexed SDGs. SDG 14, 15, and 2 are the highest-priority open tracks.",color:"#e85d26",bg:"#fff7ed",border:"#fed7aa"},
+                {icon:"🤝",title:"Research Partnerships",body:"Connect directly with faculty working on SDG-aligned research. Use the Network tab to identify collaboration fits.",color:"#0A97D9",bg:"#eff6ff",border:"#bfdbfe"},
+                {icon:"🏆",title:"Case Competition",body:"Students and teams compete on real Gies sustainability challenges. Opens cross-institutional research pathways.",color:"#6366f1",bg:"#eef2ff",border:"#c7d2fe"},
+              ].map(c=>(
+                <div key={c.title} style={{background:c.bg,borderRadius:8,padding:"10px 12px",border:`1px solid ${c.border}`}}>
+                  <div style={{fontSize:16,marginBottom:5}}>{c.icon}</div>
+                  <div style={{fontWeight:700,fontSize:11,color:c.color,marginBottom:3}}>{c.title}</div>
+                  <p style={{fontSize:10,color:"#475569",lineHeight:1.5,margin:0}}>{c.body}</p>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        )}
+
         {/* ═══════════ PERSONAS ═══════════ */}
         {tab==="personas"&&(
           <div style={{display:"flex",flexDirection:"column",gap:12}} className="view-transition">
@@ -1402,7 +1346,7 @@ function App(){
 
       </main>
 
-      {/* ── FLOATING ASK AI BUTTON — persistent on all pages ── */}
+      {/* ── FLOATING ASK AI BUTTON ── */}
       {!chatOpen&&(
         <button className="ai-fab" onClick={()=>setChatOpen(true)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C6.5 2 2 6 2 11c0 2.5 1 4.7 2.7 6.3L3 22l4.7-1.7C9 20.8 10.5 21 12 21c5.5 0 10-4 10-9.5S17.5 2 12 2z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg>
@@ -1410,12 +1354,11 @@ function App(){
         </button>
       )}
 
-      {/* ── AI DRAWER — slides from right ── */}
+      {/* ── AI DRAWER ── */}
       {chatOpen&&(
         <>
           <div className="ai-drawer-backdrop" onClick={()=>setChatOpen(false)}/>
           <div className="ai-drawer">
-            {/* Drawer header */}
             <div style={{padding:"14px 20px 12px",borderBottom:"1px solid #f1f5f9",flexShrink:0}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -1427,15 +1370,14 @@ function App(){
                     <div style={{fontSize:10,color:"#94a3b8",marginTop:3}}>AI-assisted decision support</div>
                   </div>
                 </div>
-                <button onClick={()=>setChatOpen(false)} style={{width:28,height:28,borderRadius:7,border:"1px solid #e2e8f0",background:"#f8fafc",color:"#64748b",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}}>✕</button>
+                <button onClick={()=>setChatOpen(false)} style={{width:28,height:28,borderRadius:7,border:"1px solid #e2e8f0",background:"#f8fafc",color:"#64748b",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
               </div>
               <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
                 {["Climate researchers?","Biggest gaps?","Growth trends?","Top departments?","Recommendations?"].map(p=>(
-                  <button key={p} onClick={()=>{setChatInput(p);}} style={{fontSize:10,padding:"5px 12px",borderRadius:20,border:"1px solid #e2e8f0",color:"#475569",background:"white",cursor:"pointer",fontWeight:500,transition:"all .15s"}}>{p}</button>
+                  <button key={p} onClick={()=>setChatInput(p)} style={{fontSize:10,padding:"5px 12px",borderRadius:20,border:"1px solid #e2e8f0",color:"#475569",background:"white",cursor:"pointer",fontWeight:500}}>{p}</button>
                 ))}
               </div>
             </div>
-            {/* Drawer messages */}
             <div style={{flex:1,overflowY:"auto",padding:"12px 20px",display:"flex",flexDirection:"column",gap:8}}>
               {chatMsgs.length===0&&(
                 <div style={{textAlign:"center",paddingTop:40,color:"#94a3b8"}}>
@@ -1446,7 +1388,7 @@ function App(){
               )}
               {chatMsgs.map((m,i)=>(
                 <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}} className="fadein">
-                  <div style={{maxWidth:"82%",padding:"10px 14px",borderRadius:m.role==="user"?"14px 14px 4px 14px":"14px 14px 14px 4px",fontSize:12,lineHeight:1.6,whiteSpace:"pre-line",background:m.role==="user"?"#0a1628":"#f8fafc",color:m.role==="user"?"white":"#334155",border:m.role==="ai"?"1px solid #e2e8f0":"none",boxShadow:m.role==="ai"?"0 1px 3px rgba(0,0,0,.03)":"none"}}>{m.text}</div>
+                  <div style={{maxWidth:"82%",padding:"10px 14px",borderRadius:m.role==="user"?"14px 14px 4px 14px":"14px 14px 14px 4px",fontSize:12,lineHeight:1.6,whiteSpace:"pre-line",background:m.role==="user"?"#0a1628":"#f8fafc",color:m.role==="user"?"white":"#334155",border:m.role==="ai"?"1px solid #e2e8f0":"none"}}>{m.text}</div>
                 </div>
               ))}
               {chatLoad&&(
@@ -1455,14 +1397,13 @@ function App(){
                 </div>
               )}
             </div>
-            {/* Drawer input */}
             <div style={{padding:"10px 20px 14px",borderTop:"1px solid #f1f5f9",flexShrink:0,background:"white"}}>
               <div style={{display:"flex",gap:6}}>
                 <input value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleChat()}
                   placeholder="Ask about SDGs, researchers, or strategy..."
-                  style={{flex:1,padding:"9px 14px",background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,fontSize:11,outline:"none",transition:"border .15s"}}/>
+                  style={{flex:1,padding:"9px 14px",background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,fontSize:11,outline:"none"}}/>
                 <button onClick={handleChat} disabled={chatLoad||!chatInput.trim()}
-                  style={{padding:"9px 14px",borderRadius:10,color:"white",background:"linear-gradient(135deg,#6366f1,#4f46e5)",border:"none",fontWeight:700,fontSize:11,cursor:"pointer",opacity:chatLoad||!chatInput.trim()?0.4:1,transition:"all .15s",whiteSpace:"nowrap"}}>Send</button>
+                  style={{padding:"9px 14px",borderRadius:10,color:"white",background:"linear-gradient(135deg,#6366f1,#4f46e5)",border:"none",fontWeight:700,fontSize:11,cursor:"pointer",opacity:chatLoad||!chatInput.trim()?0.4:1}}>Send</button>
               </div>
               <div style={{textAlign:"center",marginTop:6,fontSize:8,color:"#b0b8c4"}}>Rules-based synthesis · Not predictive AI</div>
             </div>
@@ -1470,7 +1411,6 @@ function App(){
         </>
       )}
 
-      {/* ── Single consolidated AI disclaimer in footer ── */}
       <footer style={{marginTop:8,borderTop:"1px solid #eef2f7",padding:"8px 20px",textAlign:"center",fontSize:9,color:"#94a3b8",lineHeight:1.4}}>
         <div>Gies College of Business · Impact Command Center · <strong>2,022</strong> publications · <strong>426</strong> sustainable papers</div>
         <div style={{marginTop:2,fontSize:9,color:"#b0b8c4"}}>
