@@ -98,8 +98,6 @@ Full methodology is in the dashboard footer and the provenance strip on the Over
 
 ## Design Decisions Worth Noting
 
-**No numeric collaboration scores.** Earlier prototypes had a compatibility score per pairing. It was removed after judge feedback that predicting collaboration success from bibliometric data alone is methodologically unsound. Pairings are now presented as data-driven suggestions with explicit sourcing.
-
 **No fabricated researcher data.** Faculty profiles only show what is actually in the dataset: name, department, paper count, SDG assignments, and keywords. Titles, bios, and publication lists were removed.
 
 **AI transparency.** "AI-assisted" labels refer to deterministic rules-based synthesis only. The assistant does not generate predictions beyond what the data supports.
