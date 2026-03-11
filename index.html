@@ -427,9 +427,9 @@ function FacultyModal({researcher:r, onClose}){
             <div style={{width:54,height:54,borderRadius:"50%",background:`linear-gradient(135deg,${deptColor},${deptColor}cc)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"white",flexShrink:0,border:"2px solid rgba(255,255,255,0.2)"}}>{initials}</div>
             <div>
               <div style={{fontSize:16,fontWeight:900,color:"white",letterSpacing:"-.3px"}}>{r.name}</div>
-              <div style={{fontSize:11,color:"#94a3b8",marginTop:2}}>{r.dept} · Gies College of Business</div>
+              <div style={{fontSize:13,color:"#94a3b8",marginTop:2}}>{r.dept} · Gies College of Business</div>
               <div style={{marginTop:6,display:"inline-block",background:deptColor,borderRadius:20,padding:"2px 10px"}}>
-                <span style={{fontSize:9,fontWeight:700,color:"white",letterSpacing:"0.05em"}}>{r.count} sustainable papers</span>
+                <span style={{fontSize:11,fontWeight:700,color:"white",letterSpacing:"0.05em"}}>{r.count} sustainable papers</span>
               </div>
             </div>
           </div>
@@ -438,28 +438,28 @@ function FacultyModal({researcher:r, onClose}){
         <div style={{padding:"18px 22px",display:"flex",flexDirection:"column",gap:16}}>
           {/* SDG Coverage */}
           <div>
-            <div style={{fontSize:10,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>SDG Coverage — top assignments from pipeline</div>
+            <div style={{fontSize:12,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>SDG Coverage — top assignments from pipeline</div>
             {r.sdgBreakdown.map(b=>(
               <div key={b.sdg} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,padding:"8px 10px",background:"#f8fafc",borderRadius:7,border:"1px solid #f1f5f9"}}>
                 <div style={{width:28,height:28,borderRadius:6,background:SDG_META[b.sdg]?.color||"#64748b",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  <span style={{fontSize:11,fontWeight:900,color:"white"}}>{b.sdg}</span>
+                  <span style={{fontSize:13,fontWeight:900,color:"white"}}>{b.sdg}</span>
                 </div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:11,fontWeight:700,color:"#334155"}}>SDG {b.sdg}: {b.label}</div>
-                  <div style={{fontSize:9,color:"#94a3b8"}}>{b.count} paper assignment{b.count!==1?"s":""} · {b.sdg===r.topSdg?"Primary SDG":"Secondary SDG"}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:"#334155"}}>SDG {b.sdg}: {b.label}</div>
+                  <div style={{fontSize:11,color:"#94a3b8"}}>{b.count} paper assignment{b.count!==1?"s":""} · {b.sdg===r.topSdg?"Primary SDG":"Secondary SDG"}</div>
                 </div>
-                {b.sdg===r.topSdg&&<span style={{fontSize:9,padding:"2px 8px",borderRadius:20,background:SDG_META[b.sdg]?.color,color:"white",fontWeight:700,flexShrink:0}}>Top SDG</span>}
+                {b.sdg===r.topSdg&&<span style={{fontSize:11,padding:"2px 8px",borderRadius:20,background:SDG_META[b.sdg]?.color,color:"white",fontWeight:700,flexShrink:0}}>Top SDG</span>}
               </div>
             ))}
-            <div style={{fontSize:8,color:"#94a3b8",fontStyle:"italic"}}>Note: one paper may be assigned up to 3 SDGs by the pipeline, so assignment counts exceed paper totals.</div>
+            <div style={{fontSize:10,color:"#94a3b8",fontStyle:"italic"}}>Note: one paper may be assigned up to 3 SDGs by the pipeline, so assignment counts exceed paper totals.</div>
           </div>
           {/* Research Keywords */}
           {r.keywords&&r.keywords.length>0&&(
             <div>
-              <div style={{fontSize:10,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Research Keywords</div>
+              <div style={{fontSize:12,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Research Keywords</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
                 {r.keywords.map(k=>(
-                  <span key={k} style={{fontSize:10,padding:"4px 10px",borderRadius:20,background:"#f1f5f9",color:"#334155",fontWeight:600}}>{k}</span>
+                  <span key={k} style={{fontSize:12,padding:"4px 10px",borderRadius:20,background:"#f1f5f9",color:"#334155",fontWeight:600}}>{k}</span>
                 ))}
               </div>
             </div>
@@ -467,13 +467,13 @@ function FacultyModal({researcher:r, onClose}){
           {/* Collaboration Pairings */}
           {collabs.length>0&&(
             <div>
-              <div style={{fontSize:10,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Collaboration Opportunities</div>
+              <div style={{fontSize:12,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Collaboration Opportunities</div>
               {collabs.map((c,i)=>(
                 <div key={i} style={{padding:"8px 10px",background:"#f0fdf4",borderRadius:7,border:"1px solid #d1fae5",marginBottom:6}}>
-                  <div style={{fontSize:10,fontWeight:700,color:"#334155",marginBottom:2}}>{c.pair}</div>
-                  <div style={{fontSize:9,color:"#4a5568",marginBottom:4}}>{c.outcome}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#334155",marginBottom:2}}>{c.pair}</div>
+                  <div style={{fontSize:11,color:"#4a5568",marginBottom:4}}>{c.outcome}</div>
                   <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                    <span style={{fontSize:8,padding:"2px 7px",borderRadius:20,background:"#dcfce7",color:"#166534",fontWeight:700}}>{c.sdgs}</span>
+                    <span style={{fontSize:10,padding:"2px 7px",borderRadius:20,background:"#dcfce7",color:"#166534",fontWeight:700}}>{c.sdgs}</span>
                   </div>
                 </div>
               ))}
@@ -482,16 +482,16 @@ function FacultyModal({researcher:r, onClose}){
           {/* Real paper titles */}
           {r.topPapers&&r.topPapers.length>0&&(
             <div>
-              <div style={{fontSize:10,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Sample Publications (from dataset)</div>
+              <div style={{fontSize:12,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Sample Publications (from dataset)</div>
               {r.topPapers.map((p,i)=>(
                 <div key={i} style={{display:"flex",gap:8,marginBottom:6,padding:"7px 10px",background:"#f8fafc",borderRadius:7,border:"1px solid #f1f5f9"}}>
-                  <span style={{fontSize:10,color:deptColor,fontWeight:900,flexShrink:0}}>{p.year}</span>
-                  <span style={{fontSize:10,color:"#475569",lineHeight:1.5}}>{p.title}</span>
+                  <span style={{fontSize:12,color:deptColor,fontWeight:900,flexShrink:0}}>{p.year}</span>
+                  <span style={{fontSize:12,color:"#475569",lineHeight:1.5}}>{p.title}</span>
                 </div>
               ))}
             </div>
           )}
-          <div style={{fontSize:9,color:"#94a3b8",textAlign:"center",borderTop:"1px solid #f1f5f9",paddingTop:10}}>
+          <div style={{fontSize:11,color:"#94a3b8",textAlign:"center",borderTop:"1px solid #f1f5f9",paddingTop:10}}>
             Source: Illinois Experts API via Elsevier Scopus · 2010–2020 · {r.count} sustainable papers indexed
           </div>
         </div>
@@ -638,7 +638,7 @@ function WorldMap(){
 
   return (
     <div ref={containerRef} style={{borderRadius:10,overflow:"hidden",background:"#FAFBFC",border:"1px solid #E5E7EB"}}>
-      {error?(<div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:12}}>Unable to load map data.</div>):!ready?(<div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:12,gap:8}}><svg width="16" height="16" viewBox="0 0 16 16" style={{animation:"sdg-spin 1s linear infinite"}}><circle cx="8" cy="8" r="6" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="28" strokeDashoffset="8"/></svg>Loading map…</div>):null}
+      {error?(<div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:14}}>Unable to load map data.</div>):!ready?(<div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:14,gap:8}}><svg width="16" height="16" viewBox="0 0 16 16" style={{animation:"sdg-spin 1s linear infinite"}}><circle cx="8" cy="8" r="6" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="28" strokeDashoffset="8"/></svg>Loading map…</div>):null}
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{display:ready?"block":"none",width:"100%"}} preserveAspectRatio="xMidYMid meet"/>
     </div>
   );
@@ -651,11 +651,11 @@ function GapBar({id,gap}){
   const pct=Math.min(Math.abs(gap)/maxAbs*100,100);
   return (
     <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:4}}>
-      <span style={{fontSize:9,color:"#94a3b8",width:40,flexShrink:0}}>SDG {id}</span>
+      <span style={{fontSize:11,color:"#94a3b8",width:40,flexShrink:0}}>SDG {id}</span>
       <div style={{flex:1,position:"relative",height:10,background:"#f1f5f9",borderRadius:6,overflow:"hidden"}}>
         <div style={{position:"absolute",height:"100%",width:`${pct}%`,background:isNeg?"#ef4444":meta.color,borderRadius:6,left:isNeg?"auto":"0",right:isNeg?"0":"auto",transition:"all .4s"}}/>
       </div>
-      <span style={{fontSize:9,fontWeight:700,width:38,textAlign:"right",color:isNeg?"#ef4444":meta.color,flexShrink:0}}>{gap>0?"+":""}{gap}pp</span>
+      <span style={{fontSize:11,fontWeight:700,width:38,textAlign:"right",color:isNeg?"#ef4444":meta.color,flexShrink:0}}>{gap>0?"+":""}{gap}pp</span>
     </div>
   );
 }
@@ -665,8 +665,8 @@ function GapClosurePanel({selectedSDG}){
   const closure=computeGapClosure(selectedSDG);
   return (
     <div className="fadein" style={{marginTop:8,padding:"7px 11px",background:closure.type==="under"?"#fef2f2":"#f0fdf4",borderRadius:7,border:`1px solid ${closure.type==="under"?"#fecaca":"#bbf7d0"}`}}>
-      <div style={{fontSize:9,fontWeight:700,color:closure.type==="under"?"#991b1b":"#166534",textTransform:"uppercase",letterSpacing:.8,marginBottom:2}}>Gap Closure</div>
-      {closure.type==="under"?(<div style={{fontSize:11,color:"#7f1d1d",lineHeight:1.5}}>Requires <strong>+{closure.required} papers</strong> to match global share.</div>):closure.type==="over"?(<div style={{fontSize:11,color:"#14532d",lineHeight:1.5}}>Exceeds benchmark by <strong>{closure.excess} papers</strong>.</div>):(<div style={{fontSize:11,color:"#6b7280"}}>Aligned with global benchmark.</div>)}
+      <div style={{fontSize:11,fontWeight:700,color:closure.type==="under"?"#991b1b":"#166534",textTransform:"uppercase",letterSpacing:.8,marginBottom:2}}>Gap Closure</div>
+      {closure.type==="under"?(<div style={{fontSize:13,color:"#7f1d1d",lineHeight:1.5}}>Requires <strong>+{closure.required} papers</strong> to match global share.</div>):closure.type==="over"?(<div style={{fontSize:13,color:"#14532d",lineHeight:1.5}}>Exceeds benchmark by <strong>{closure.excess} papers</strong>.</div>):(<div style={{fontSize:13,color:"#6b7280"}}>Aligned with global benchmark.</div>)}
     </div>
   );
 }
@@ -675,14 +675,14 @@ function PairingPreview({pair}){
   if(!pair) return null;
   return (
     <div className="fadein" style={{background:"#f8fafc",borderRadius:8,padding:11,border:"1px solid #e2e8f0",marginTop:8}}>
-      <div style={{fontSize:9,fontWeight:700,color:"#334155",textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Pairing Analysis</div>
+      <div style={{fontSize:11,fontWeight:700,color:"#334155",textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Pairing Analysis</div>
       {[["Themes",pair.themes.join(", ")],["Shared SDGs",pair.sharedSdgs.map(s=>`SDG ${s}`).join(", ")]].map(([l,v])=>(
-        <div key={l} style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:3}}>
+        <div key={l} style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:3}}>
           <span style={{color:"#64748b"}}>{l}</span>
           <span style={{fontWeight:600,color:"#334155",textAlign:"right",maxWidth:"60%"}}>{v}</span>
         </div>
       ))}
-      <div style={{fontSize:8,color:"#94a3b8",marginTop:6,fontStyle:"italic"}}>Pairings based on shared SDG indexing from the dataset. Compatibility scores are not included — predicting collaboration success requires qualitative assessment beyond bibliometric data.</div>
+      <div style={{fontSize:10,color:"#94a3b8",marginTop:6,fontStyle:"italic"}}>Pairings based on shared SDG indexing from the dataset. Compatibility scores are not included — predicting collaboration success requires qualitative assessment beyond bibliometric data.</div>
     </div>
   );
 }
@@ -699,23 +699,23 @@ function DataSourcesModal({onClose}){
   return (
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
       <div onClick={e=>e.stopPropagation()} style={{background:"white",borderRadius:18,padding:28,maxWidth:560,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,.2)",position:"relative",maxHeight:"90vh",overflowY:"auto"}}>
-        <button onClick={onClose} style={{position:"absolute",top:12,right:12,width:28,height:28,borderRadius:"50%",border:"none",background:"#f1f5f9",color:"#64748b",fontSize:15,cursor:"pointer"}}>×</button>
+        <button onClick={onClose} style={{position:"absolute",top:12,right:12,width:28,height:28,borderRadius:"50%",border:"none",background:"#f1f5f9",color:"#64748b",fontSize:17,cursor:"pointer"}}>×</button>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
           <div style={{width:38,height:38,borderRadius:10,background:"#eff6ff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🔬</div>
           <div>
-            <div style={{fontSize:15,fontWeight:900,color:"#0f172a"}}>Data Sources & Methodology</div>
-            <div style={{fontSize:10,color:"#94a3b8",marginTop:2}}>Collection, classification, and benchmarking pipeline</div>
+            <div style={{fontSize:17,fontWeight:900,color:"#0f172a"}}>Data Sources & Methodology</div>
+            <div style={{fontSize:12,color:"#94a3b8",marginTop:2}}>Collection, classification, and benchmarking pipeline</div>
           </div>
         </div>
         <div style={{background:"#f8fafc",borderRadius:11,padding:14,marginBottom:14}}>
-          <div style={{fontSize:9,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Data Provenance</div>
+          <div style={{fontSize:11,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Data Provenance</div>
           {chain.map((step,i)=>(
             <div key={step.label}>
               <div style={{display:"flex",alignItems:"flex-start",gap:9}}>
-                <div style={{width:26,height:26,borderRadius:6,background:step.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:"white",flexShrink:0}}>{step.icon}</div>
+                <div style={{width:26,height:26,borderRadius:6,background:step.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900,color:"white",flexShrink:0}}>{step.icon}</div>
                 <div>
-                  <div style={{fontWeight:700,fontSize:12,color:"#0f172a"}}>{step.label}</div>
-                  <div style={{fontSize:10,color:"#64748b",lineHeight:1.5,marginTop:1}}>{step.sub}</div>
+                  <div style={{fontWeight:700,fontSize:14,color:"#0f172a"}}>{step.label}</div>
+                  <div style={{fontSize:12,color:"#64748b",lineHeight:1.5,marginTop:1}}>{step.sub}</div>
                 </div>
               </div>
               {i<chain.length-1&&<div style={{marginLeft:12,marginTop:3,marginBottom:3,width:2,height:10,background:"#e2e8f0"}}/>}
@@ -729,13 +729,13 @@ function DataSourcesModal({onClose}){
             {label:"SDGs Covered",val:"15/17",sub:"SDG 14, 15 at zero",color:"#e85d26"}
           ].map(s=>(
             <div key={s.label} style={{background:"#f8fafc",borderRadius:9,padding:10,textAlign:"center",border:"1px solid #e2e8f0"}}>
-              <div style={{fontSize:19,fontWeight:900,color:s.color}}>{s.val}</div>
-              <div style={{fontSize:9,fontWeight:700,color:"#334155",marginTop:2}}>{s.label}</div>
-              <div style={{fontSize:8,color:"#94a3b8",marginTop:1}}>{s.sub}</div>
+              <div style={{fontSize:21,fontWeight:900,color:s.color}}>{s.val}</div>
+              <div style={{fontSize:11,fontWeight:700,color:"#334155",marginTop:2}}>{s.label}</div>
+              <div style={{fontSize:10,color:"#94a3b8",marginTop:1}}>{s.sub}</div>
             </div>
           ))}
         </div>
-        <div style={{padding:"9px 12px",background:"#fffbeb",borderRadius:8,border:"1px solid #fde68a",fontSize:10,color:"#92400e"}}>
+        <div style={{padding:"9px 12px",background:"#fffbeb",borderRadius:8,border:"1px solid #fde68a",fontSize:12,color:"#92400e"}}>
           <strong>Methodology:</strong> All insights are deterministic (rules-based). "AI-assisted" indicates automated analysis, not predictions. Global benchmark normalized from UN SDG 2023 distribution. Architecture supports live bibliometric integration.
         </div>
         {[
@@ -743,7 +743,7 @@ function DataSourcesModal({onClose}){
           {label:"Illinois Experts — About and FAQ",url:"https://publish.illinois.edu/experts-help/"},
           {label:"UIUC OVCRI — Find Collaborators",url:"https://research.illinois.edu/funding-proposal-support/find-collaborators-illinois-experts"}
         ].map(l=>(
-          <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",gap:6,padding:"6px 10px",marginTop:5,background:"#f8fafc",borderRadius:7,border:"1px solid #e2e8f0",color:"#334155",fontSize:10}}>
+          <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",gap:6,padding:"6px 10px",marginTop:5,background:"#f8fafc",borderRadius:7,border:"1px solid #e2e8f0",color:"#334155",fontSize:12}}>
             <span style={{flex:1}}>{l.label}</span><span style={{color:"#94a3b8"}}>↗</span>
           </a>
         ))}
@@ -833,8 +833,8 @@ function App(){
 
   const S={
     card:{background:"white",borderRadius:8,padding:10,boxShadow:"0 1px 3px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.02)",border:"1px solid #eef2f7"},
-    label:{fontSize:8,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1},
-    aiTag:{display:"inline-flex",alignItems:"center",gap:3,fontSize:7,fontWeight:600,color:"#6366f1",background:"#eef2ff",padding:"2px 6px",borderRadius:20,border:"1px solid #e0e7ff"}
+    label:{fontSize:10,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1},
+    aiTag:{display:"inline-flex",alignItems:"center",gap:3,fontSize:9,fontWeight:600,color:"#6366f1",background:"#eef2ff",padding:"2px 6px",borderRadius:20,border:"1px solid #e0e7ff"}
   };
   const snapshotIcons={up:"▲",down:"▼",globe:"◉",trend:"→"};
   const visibleSnapshot=snapshotExpanded?snapshot:snapshot.slice(0,2);
@@ -847,16 +847,16 @@ function App(){
       <header style={{background:"#0a1628",position:"sticky",top:0,zIndex:50,boxShadow:"0 1px 8px rgba(0,0,0,.2)"}}>
         <div style={{maxWidth:1400,margin:"0 auto",padding:"0 12px",height:isMobile?42:46,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
           <div style={{display:"flex",alignItems:"center",gap:7,flexShrink:0}}>
-            <div style={{width:28,height:28,borderRadius:7,background:"#e85d26",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"white",fontSize:13}}>G</div>
+            <div style={{width:28,height:28,borderRadius:7,background:"#e85d26",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"white",fontSize:15}}>G</div>
             {!isMobile&&<div>
-              <div style={{color:"white",fontWeight:700,fontSize:13,lineHeight:1}}>Gies College of Business</div>
-              <div style={{color:"#64748b",fontSize:10,marginTop:1}}>Impact Command Center</div>
+              <div style={{color:"white",fontWeight:700,fontSize:15,lineHeight:1}}>Gies College of Business</div>
+              <div style={{color:"#64748b",fontSize:12,marginTop:1}}>Impact Command Center</div>
             </div>}
-            {isMobile&&<div style={{color:"white",fontWeight:700,fontSize:12}}>Gies Impact</div>}
+            {isMobile&&<div style={{color:"white",fontWeight:700,fontSize:14}}>Gies Impact</div>}
           </div>
           {!isMobile&&<div style={{display:"flex",alignItems:"center",gap:3,background:"rgba(255,255,255,.06)",padding:3,borderRadius:20,border:"1px solid rgba(255,255,255,.08)"}}>
-            <button onClick={()=>handlePersonaSwitch("donor")} style={{fontSize:10,fontWeight:600,padding:"5px 12px",borderRadius:16,border:"none",cursor:"pointer",background:personaView==="donor"?"#e85d26":"transparent",color:personaView==="donor"?"white":"#64748b",transition:"all .2s"}}>🎯 Donor View</button>
-            <button onClick={()=>handlePersonaSwitch("student")} style={{fontSize:10,fontWeight:600,padding:"5px 12px",borderRadius:16,border:"none",cursor:"pointer",background:personaView==="student"?"#6366f1":"transparent",color:personaView==="student"?"white":"#64748b",transition:"all .2s"}}>🎓 Student View</button>
+            <button onClick={()=>handlePersonaSwitch("donor")} style={{fontSize:12,fontWeight:600,padding:"5px 12px",borderRadius:16,border:"none",cursor:"pointer",background:personaView==="donor"?"#e85d26":"transparent",color:personaView==="donor"?"white":"#64748b",transition:"all .2s"}}>🎯 Donor View</button>
+            <button onClick={()=>handlePersonaSwitch("student")} style={{fontSize:12,fontWeight:600,padding:"5px 12px",borderRadius:16,border:"none",cursor:"pointer",background:personaView==="student"?"#6366f1":"transparent",color:personaView==="student"?"white":"#64748b",transition:"all .2s"}}>🎓 Student View</button>
           </div>}
           <nav className="tab-scroll" style={{display:"flex",gap:2,background:"rgba(255,255,255,.06)",padding:3,borderRadius:10,overflowX:isMobile?"auto":"visible",flexShrink:isMobile?1:0}}>
             {TABS.map(t=>(
@@ -866,15 +866,15 @@ function App(){
           <div style={{display:"flex",alignItems:"center",gap:5,flexShrink:0}}>
             {!isMobile&&<div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,.06)",padding:"4px 10px",borderRadius:20}}>
               <div className="pulse-dot" style={{width:5,height:5,borderRadius:"50%",background:"#4ade80"}}/>
-              <span style={{color:"#4ade80",fontSize:10,fontWeight:600}}>Live Data</span>
+              <span style={{color:"#4ade80",fontSize:12,fontWeight:600}}>Live Data</span>
             </div>}
-            <button onClick={()=>setShowSources(true)} title="Data Sources" style={{width:27,height:27,borderRadius:"50%",border:"1px solid rgba(255,255,255,.12)",background:"rgba(255,255,255,.05)",color:"#94a3b8",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>i</button>
+            <button onClick={()=>setShowSources(true)} title="Data Sources" style={{width:27,height:27,borderRadius:"50%",border:"1px solid rgba(255,255,255,.12)",background:"rgba(255,255,255,.05)",color:"#94a3b8",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>i</button>
           </div>
         </div>
         {/* Mobile persona toggle row */}
         {isMobile&&<div style={{display:"flex",gap:2,padding:"3px 12px 5px",background:"rgba(255,255,255,.03)",borderTop:"1px solid rgba(255,255,255,.06)"}}>
-          <button onClick={()=>handlePersonaSwitch("donor")} style={{flex:1,fontSize:9,fontWeight:600,padding:"4px 8px",borderRadius:12,border:"none",cursor:"pointer",background:personaView==="donor"?"#e85d26":"transparent",color:personaView==="donor"?"white":"#64748b"}}>🎯 Donor View</button>
-          <button onClick={()=>handlePersonaSwitch("student")} style={{flex:1,fontSize:9,fontWeight:600,padding:"4px 8px",borderRadius:12,border:"none",cursor:"pointer",background:personaView==="student"?"#6366f1":"transparent",color:personaView==="student"?"white":"#64748b"}}>🎓 Student View</button>
+          <button onClick={()=>handlePersonaSwitch("donor")} style={{flex:1,fontSize:11,fontWeight:600,padding:"4px 8px",borderRadius:12,border:"none",cursor:"pointer",background:personaView==="donor"?"#e85d26":"transparent",color:personaView==="donor"?"white":"#64748b"}}>🎯 Donor View</button>
+          <button onClick={()=>handlePersonaSwitch("student")} style={{flex:1,fontSize:11,fontWeight:600,padding:"4px 8px",borderRadius:12,border:"none",cursor:"pointer",background:personaView==="student"?"#6366f1":"transparent",color:personaView==="student"?"white":"#64748b"}}>🎓 Student View</button>
         </div>}
       </header>
 
@@ -885,17 +885,17 @@ function App(){
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             <div className="fadein" style={{background:"#f5f5f4",borderRadius:10,padding:isMobile?"14px 16px 14px":"22px 32px 20px",marginBottom:2}}>
               <div style={{display:"inline-block",background:"rgba(232,93,38,0.12)",borderRadius:20,padding:"4px 14px",marginBottom:10}}>
-                <span style={{fontSize:10,fontWeight:700,color:"#e85d26",letterSpacing:"0.08em",textTransform:"uppercase"}}>Sustainability at Gies</span>
+                <span style={{fontSize:12,fontWeight:700,color:"#e85d26",letterSpacing:"0.08em",textTransform:"uppercase"}}>Sustainability at Gies</span>
               </div>
               <div style={{fontSize:isMobile?20:28,fontWeight:900,color:"#13294B",lineHeight:1.15,marginBottom:10}}>
                 Moving from Information to <span style={{color:"#e85d26"}}>Action.</span>
               </div>
-              <div style={{fontSize:13,color:"#4a5568",lineHeight:1.6,maxWidth:520}}>
+              <div style={{fontSize:15,color:"#4a5568",lineHeight:1.6,maxWidth:520}}>
                 Empowering our community to track, understand, and contribute to sustainability initiatives. We bridge data-driven insights with actionable solutions.
               </div>
               {/* Data provenance strip */}
               <div style={{marginTop:14,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}}>
-                <span style={{fontSize:9,fontWeight:700,color:"#94a3b8",letterSpacing:"0.06em",textTransform:"uppercase"}}>Data:</span>
+                <span style={{fontSize:11,fontWeight:700,color:"#94a3b8",letterSpacing:"0.06em",textTransform:"uppercase"}}>Data:</span>
                 {[
                   {label:"Illinois Experts API",sub:"Gies faculty publications"},
                   {label:"Elsevier Scopus",sub:"Bibliometric indexing"},
@@ -903,11 +903,11 @@ function App(){
                 ].map(s=>(
                   <div key={s.label} style={{display:"flex",alignItems:"center",gap:5,background:"white",borderRadius:20,padding:"3px 10px",border:"1px solid #e2e8f0"}}>
                     <div style={{width:5,height:5,borderRadius:"50%",background:"#3F7E44",flexShrink:0}}/>
-                    <span style={{fontSize:9,fontWeight:600,color:"#334155"}}>{s.label}</span>
-                    <span style={{fontSize:8,color:"#94a3b8"}}>· {s.sub}</span>
+                    <span style={{fontSize:11,fontWeight:600,color:"#334155"}}>{s.label}</span>
+                    <span style={{fontSize:10,color:"#94a3b8"}}>· {s.sub}</span>
                   </div>
                 ))}
-                <button onClick={()=>setShowSources(true)} style={{fontSize:9,color:"#6366f1",background:"none",border:"none",cursor:"pointer",fontWeight:600,padding:0,textDecoration:"underline"}}>Full methodology →</button>
+                <button onClick={()=>setShowSources(true)} style={{fontSize:11,color:"#6366f1",background:"none",border:"none",cursor:"pointer",fontWeight:600,padding:0,textDecoration:"underline"}}>Full methodology →</button>
               </div>
             </div>
             {/* AI chatbot inline preview */}
@@ -917,19 +917,19 @@ function App(){
               </div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
-                  <span style={{fontSize:11,fontWeight:800,color:"white"}}>Research Intelligence Assistant</span>
-                  <span style={{fontSize:8,padding:"2px 7px",borderRadius:20,background:"rgba(99,102,241,0.25)",color:"#a5b4fc",fontWeight:700,border:"1px solid rgba(99,102,241,0.3)"}}>AI</span>
-                  <span style={{fontSize:8,color:"#64748b",marginLeft:"auto"}}>Ask anything about Gies research</span>
+                  <span style={{fontSize:13,fontWeight:800,color:"white"}}>Research Intelligence Assistant</span>
+                  <span style={{fontSize:10,padding:"2px 7px",borderRadius:20,background:"rgba(99,102,241,0.25)",color:"#a5b4fc",fontWeight:700,border:"1px solid rgba(99,102,241,0.3)"}}>AI</span>
+                  <span style={{fontSize:10,color:"#64748b",marginLeft:"auto"}}>Ask anything about Gies research</span>
                 </div>
                 {/* Sample auto-surface insight */}
                 <div style={{background:"rgba(255,255,255,0.06)",borderRadius:7,padding:"8px 10px",marginBottom:8,borderLeft:"3px solid #6366f1"}}>
-                  <div style={{fontSize:8,color:"#94a3b8",marginBottom:3,fontWeight:600}}>LATEST INSIGHT</div>
-                  <div style={{fontSize:10,color:"#cbd5e1",lineHeight:1.5}}>Gies has <strong style={{color:"white"}}>zero publications</strong> in SDG 14 & 15 vs. a ~5.7% global benchmark — the largest coverage gap. Cross-departmental seed grants could address this without new hiring.</div>
+                  <div style={{fontSize:10,color:"#94a3b8",marginBottom:3,fontWeight:600}}>LATEST INSIGHT</div>
+                  <div style={{fontSize:12,color:"#cbd5e1",lineHeight:1.5}}>Gies has <strong style={{color:"white"}}>zero publications</strong> in SDG 14 & 15 vs. a ~5.7% global benchmark — the largest coverage gap. Cross-departmental seed grants could address this without new hiring.</div>
                 </div>
                 {/* Quick prompts */}
                 <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                   {["What are Gies' biggest SDG gaps?","Who works on climate finance?","Which departments lead on SDG 3?","What collaborations do you recommend?"].map(q=>(
-                    <button key={q} onClick={()=>{setChatOpen(true);setChatInput(q);}} style={{fontSize:9,padding:"4px 9px",borderRadius:20,background:"rgba(255,255,255,0.08)",color:"#cbd5e1",border:"1px solid rgba(255,255,255,0.12)",cursor:"pointer",fontWeight:500,transition:"all .15s"}}
+                    <button key={q} onClick={()=>{setChatOpen(true);setChatInput(q);}} style={{fontSize:11,padding:"4px 9px",borderRadius:20,background:"rgba(255,255,255,0.08)",color:"#cbd5e1",border:"1px solid rgba(255,255,255,0.12)",cursor:"pointer",fontWeight:500,transition:"all .15s"}}
                       onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.15)";e.currentTarget.style.color="white";}}
                       onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.08)";e.currentTarget.style.color="#cbd5e1";}}
                     >{q}</button>
@@ -939,10 +939,10 @@ function App(){
             </div>
             {personaView==="donor"&&(
               <div className="fadein" style={{background:"linear-gradient(135deg,#fffbeb,#fef3c7)",borderRadius:6,padding:"5px 12px",border:"1px solid #fde68a",display:"flex",alignItems:"center",gap:6}}>
-                <span style={{fontSize:11}}>🎯</span>
+                <span style={{fontSize:13}}>🎯</span>
                 <div>
-                  <div style={{fontSize:10,fontWeight:700,color:"#92400e"}}>Donor Impact View</div>
-                  <div style={{fontSize:9,color:"#a16207"}}>Strategic investment outcomes, SDG alignment, and research impact.</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#92400e"}}>Donor Impact View</div>
+                  <div style={{fontSize:11,color:"#a16207"}}>Strategic investment outcomes, SDG alignment, and research impact.</div>
                 </div>
               </div>
             )}
@@ -957,7 +957,7 @@ function App(){
                 <div key={k.label} style={{...S.card,padding:"8px 11px"}} className="fadein">
                   <div style={S.label}>{k.label}</div>
                   <div style={{fontSize:isMobile?20:24,fontWeight:900,color:k.color,margin:"2px 0 1px",letterSpacing:"-.5px"}}>{k.val}</div>
-                  <div style={{fontSize:8,color:"#94a3b8"}}>{k.sub}</div>
+                  <div style={{fontSize:10,color:"#94a3b8"}}>{k.sub}</div>
                 </div>
               ))}
             </div>
@@ -974,15 +974,15 @@ function App(){
                     <>
                       <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:0}}>
                         <div style={{width:4,height:4,borderRadius:"50%",background:"#6366f1"}}/>
-                        <div style={{fontWeight:800,fontSize:12,color:"#0f172a",letterSpacing:"-.2px"}}>SDG Intelligence</div>
+                        <div style={{fontWeight:800,fontSize:14,color:"#0f172a",letterSpacing:"-.2px"}}>SDG Intelligence</div>
                       </div>
                       {selId?(
                         <div className="fadein" style={{background:"linear-gradient(135deg,#0a1628,#162544)",borderRadius:8,padding:"8px 9px",display:"flex",flexDirection:"column",gap:5}}>
                           <div style={{display:"flex",alignItems:"center",gap:7}}>
-                            <div style={{width:24,height:24,borderRadius:6,background:SDG_META[selId].color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"white"}}>{selId}</div>
+                            <div style={{width:24,height:24,borderRadius:6,background:SDG_META[selId].color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"white"}}>{selId}</div>
                             <div>
-                              <div style={{fontSize:12,fontWeight:700,color:"white",lineHeight:1.2}}>{SDG_META[selId].name}</div>
-                              <div style={{fontSize:9,color:"#94a3b8",marginTop:1}}>Active filter</div>
+                              <div style={{fontSize:14,fontWeight:700,color:"white",lineHeight:1.2}}>{SDG_META[selId].name}</div>
+                              <div style={{fontSize:11,color:"#94a3b8",marginTop:1}}>Active filter</div>
                             </div>
                           </div>
                           <div style={{display:"flex",flexDirection:"column",gap:3}}>
@@ -994,14 +994,14 @@ function App(){
                             ].map(r=>(
                               <div key={r.label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 7px",background:"rgba(255,255,255,.04)",borderRadius:5}}>
                                 <div style={{display:"flex",alignItems:"center",gap:5}}>
-                                  <span style={{fontSize:10}}>{r.icon}</span>
-                                  <span style={{fontSize:10,color:"#94a3b8",fontWeight:500}}>{r.label}</span>
+                                  <span style={{fontSize:12}}>{r.icon}</span>
+                                  <span style={{fontSize:12,color:"#94a3b8",fontWeight:500}}>{r.label}</span>
                                 </div>
-                                <span style={{fontSize:12,fontWeight:800,color:r.color}}>{r.value}</span>
+                                <span style={{fontSize:14,fontWeight:800,color:r.color}}>{r.value}</span>
                               </div>
                             ))}
                           </div>
-                          <button onClick={clearSDG} style={{marginTop:4,fontSize:10,padding:"6px 0",borderRadius:8,background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",color:"#94a3b8",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Clear filter ✕</button>
+                          <button onClick={clearSDG} style={{marginTop:4,fontSize:12,padding:"6px 0",borderRadius:8,background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",color:"#94a3b8",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Clear filter ✕</button>
                         </div>
                       ):(
                         <div style={{display:"flex",flexDirection:"column",gap:3}}>
@@ -1014,10 +1014,10 @@ function App(){
                               {icon:"📈",bg:"#fefce8",border:"#fde68a",label:"Growth (2010–2020)",customVal:"+347%",customSub:"trend",valColor:"#b45309"}
                             ].map((item,i)=>(
                               <div key={i} style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:item.bg,borderRadius:5,border:`1px solid ${item.border}`}}>
-                                <span style={{fontSize:9}}>{item.icon}</span>
+                                <span style={{fontSize:11}}>{item.icon}</span>
                                 <div style={{flex:1}}>
-                                  <div style={{fontSize:8,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>{item.label}</div>
-                                  <div style={{fontSize:12,fontWeight:800,color:item.valColor}}>{item.customVal||`SDG ${item.id}: ${SDG_META[item.id]?.name}`}</div>
+                                  <div style={{fontSize:10,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>{item.label}</div>
+                                  <div style={{fontSize:14,fontWeight:800,color:item.valColor}}>{item.customVal||`SDG ${item.id}: ${SDG_META[item.id]?.name}`}</div>
                                 </div>
                                 <span style={{fontSize:item.customSub?9:10,fontWeight:800,color:item.subColor||item.valColor}}>{item.customSub||item.val}</span>
                               </div>
@@ -1030,14 +1030,14 @@ function App(){
                 })()}
                 <div style={S.card}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
-                    <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Papers by Department</div>
-                    {selSDGs.length>0&&<span style={{fontSize:9,color:"#e85d26",fontWeight:700,padding:"2px 8px",borderRadius:20,background:"#fff7ed",border:"1px solid #fed7aa"}}>Filtered</span>}
+                    <div style={{fontWeight:700,color:"#334155",fontSize:13}}>Papers by Department</div>
+                    {selSDGs.length>0&&<span style={{fontSize:11,color:"#e85d26",fontWeight:700,padding:"2px 8px",borderRadius:20,background:"#fff7ed",border:"1px solid #fed7aa"}}>Filtered</span>}
                   </div>
                   {filteredDepts.map(d=>{
                     const mx=Math.max(...filteredDepts.map(x=>x.c));
                     return (
                       <div key={d.dept} style={{marginBottom:4}}>
-                        <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:1}}>
+                        <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:1}}>
                           <span style={{color:d.dim?"#cbd5e1":"#475569",fontWeight:d.dim?400:600}}>{d.dept}</span>
                           <span style={{fontWeight:700,color:d.dim?"#cbd5e1":"#e85d26"}}>{d.c}</span>
                         </div>
@@ -1049,21 +1049,21 @@ function App(){
                   })}
                 </div>
                 <div style={S.card}>
-                  <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:5}}>{selSDGs.length>0?`Researchers: SDG ${selSDGs.join(", ")}`:`Top Researchers`}</div>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:13,marginBottom:5}}>{selSDGs.length>0?`Researchers: SDG ${selSDGs.join(", ")}`:`Top Researchers`}</div>
                   {(selSDGs.length>0?filteredResearchers:RESEARCHERS.slice(0,5)).map((r,i,a)=>(
                     <div key={r.name} onClick={()=>setSelectedFaculty(r)} className="fadein" style={{display:"flex",alignItems:"center",gap:6,marginBottom:i===a.length-1?0:4,padding:"4px 7px",background:"#f8fafc",borderRadius:6,border:"1px solid #f1f5f9",cursor:"pointer",transition:"background .15s"}}
                       onMouseEnter={e=>e.currentTarget.style.background="#eef2f7"}
                       onMouseLeave={e=>e.currentTarget.style.background="#f8fafc"}>
-                      <div style={{width:24,height:24,borderRadius:"50%",background:SDG_META[r.topSdg]?.color||"#64748b",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,color:"white",flexShrink:0}}>{r.count}</div>
+                      <div style={{width:24,height:24,borderRadius:"50%",background:SDG_META[r.topSdg]?.color||"#64748b",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"white",flexShrink:0}}>{r.count}</div>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:11,fontWeight:700,color:"#334155",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{r.name}</div>
-                        <div style={{fontSize:9,color:"#94a3b8"}}>{r.dept}</div>
+                        <div style={{fontSize:13,fontWeight:700,color:"#334155",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{r.name}</div>
+                        <div style={{fontSize:11,color:"#94a3b8"}}>{r.dept}</div>
                       </div>
-                      <span style={{fontSize:9,padding:"3px 7px",borderRadius:20,color:"white",fontWeight:700,background:SDG_META[r.topSdg]?.color||"#64748b",flexShrink:0}}>SDG {r.topSdg}</span>
-                      <span style={{fontSize:9,color:"#94a3b8",flexShrink:0}}>→</span>
+                      <span style={{fontSize:11,padding:"3px 7px",borderRadius:20,color:"white",fontWeight:700,background:SDG_META[r.topSdg]?.color||"#64748b",flexShrink:0}}>SDG {r.topSdg}</span>
+                      <span style={{fontSize:11,color:"#94a3b8",flexShrink:0}}>→</span>
                     </div>
                   ))}
-                  <div style={{fontSize:8,color:"#94a3b8",marginTop:5,textAlign:"center"}}>Click any researcher to view full profile</div>
+                  <div style={{fontSize:10,color:"#94a3b8",marginTop:5,textAlign:"center"}}>Click any researcher to view full profile</div>
                 </div>
                 <div style={{background:"linear-gradient(135deg,#0a1628 0%,#162544 100%)",borderRadius:8,padding:"10px 12px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
@@ -1071,8 +1071,8 @@ function App(){
                       <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
                     </div>
                     <div style={{flex:1}}>
-                      <div style={{fontWeight:800,fontSize:11,color:"white",letterSpacing:"-.2px"}}>{selSDGs.length===1?`SDG ${selSDGs[0]} Summary`:"Strategic Snapshot"}</div>
-                      <div style={{fontSize:8,color:"#64748b",marginTop:1}}>AI-synthesized intelligence</div>
+                      <div style={{fontWeight:800,fontSize:13,color:"white",letterSpacing:"-.2px"}}>{selSDGs.length===1?`SDG ${selSDGs[0]} Summary`:"Strategic Snapshot"}</div>
+                      <div style={{fontSize:10,color:"#64748b",marginTop:1}}>AI-synthesized intelligence</div>
                     </div>
                     <span style={{...S.aiTag,color:"#a5b4fc",background:"rgba(165,180,252,.08)",border:"1px solid rgba(165,180,252,.15)"}}>AI</span>
                   </div>
@@ -1081,13 +1081,13 @@ function App(){
                       <div style={{display:"flex",flexDirection:"column",gap:3}} className="fadein">
                         {visibleSnapshot.map((s,i)=>(
                           <div key={i} style={{display:"flex",gap:5,background:"rgba(255,255,255,.04)",borderRadius:5,padding:"5px 7px",borderLeft:`3px solid ${s.color}`}}>
-                            <span style={{fontSize:10,color:s.color,flexShrink:0,marginTop:1}}>{snapshotIcons[s.icon]}</span>
-                            <p style={{fontSize:10,color:"#cbd5e1",lineHeight:1.5,margin:0}}>{s.text}</p>
+                            <span style={{fontSize:12,color:s.color,flexShrink:0,marginTop:1}}>{snapshotIcons[s.icon]}</span>
+                            <p style={{fontSize:12,color:"#cbd5e1",lineHeight:1.5,margin:0}}>{s.text}</p>
                           </div>
                         ))}
                       </div>
                       {snapshot.length>2&&(
-                        <button onClick={()=>setSnapshotExpanded(!snapshotExpanded)} style={{marginTop:6,fontSize:9,fontWeight:600,color:"#a5b4fc",background:"none",border:"none",cursor:"pointer",padding:0}}>
+                        <button onClick={()=>setSnapshotExpanded(!snapshotExpanded)} style={{marginTop:6,fontSize:11,fontWeight:600,color:"#a5b4fc",background:"none",border:"none",cursor:"pointer",padding:0}}>
                           {snapshotExpanded?"Show less ▲":`View all ${snapshot.length} insights ▼`}
                         </button>
                       )}
@@ -1102,46 +1102,46 @@ function App(){
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",marginBottom:2,position:"relative",zIndex:1}}>
                     <div>
                       <div style={{fontWeight:900,fontSize:14,color:"#0f172a",letterSpacing:"-.3px"}}>SDG Research Alignment</div>
-                      <div style={{fontSize:9,color:"#94a3b8",marginTop:1}}>Institutional coverage mapped to 17 UN SDGs</div>
+                      <div style={{fontSize:11,color:"#94a3b8",marginTop:1}}>Institutional coverage mapped to 17 UN SDGs</div>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:4,background:"#f8fafc",borderRadius:20,padding:"3px 5px",border:"1px solid #eef2f7"}}>
-                      <button onClick={()=>setShowGlobal(false)} style={{fontSize:10,fontWeight:600,padding:"4px 11px",borderRadius:16,border:"none",cursor:"pointer",background:!showGlobal?"#0a1628":"transparent",color:!showGlobal?"white":"#94a3b8",transition:"all .2s"}}>Institutional</button>
-                      <button onClick={()=>setShowGlobal(true)} style={{fontSize:10,fontWeight:600,padding:"4px 11px",borderRadius:16,border:"none",cursor:"pointer",background:showGlobal?"#6366f1":"transparent",color:showGlobal?"white":"#94a3b8",transition:"all .2s"}}>vs. Global</button>
+                      <button onClick={()=>setShowGlobal(false)} style={{fontSize:12,fontWeight:600,padding:"4px 11px",borderRadius:16,border:"none",cursor:"pointer",background:!showGlobal?"#0a1628":"transparent",color:!showGlobal?"white":"#94a3b8",transition:"all .2s"}}>Institutional</button>
+                      <button onClick={()=>setShowGlobal(true)} style={{fontSize:12,fontWeight:600,padding:"4px 11px",borderRadius:16,border:"none",cursor:"pointer",background:showGlobal?"#6366f1":"transparent",color:showGlobal?"white":"#94a3b8",transition:"all .2s"}}>vs. Global</button>
                     </div>
                   </div>
-                  {showGlobal&&<div style={{background:"#f8f7ff",borderRadius:6,padding:"4px 12px",border:"1px solid #e0e7ff",fontSize:9,color:"#4338ca",marginBottom:6,alignSelf:"flex-start",position:"relative",zIndex:1}}>Inner = Gies · Outer = Global (UN SDG 2023)</div>}
+                  {showGlobal&&<div style={{background:"#f8f7ff",borderRadius:6,padding:"4px 12px",border:"1px solid #e0e7ff",fontSize:11,color:"#4338ca",marginBottom:6,alignSelf:"flex-start",position:"relative",zIndex:1}}>Inner = Gies · Outer = Global (UN SDG 2023)</div>}
                   <div style={{width:"100%",maxWidth:500,aspectRatio:"1",position:"relative",zIndex:1}}>
                     <SDGWheel selected={selSDGs} onToggle={toggleSDG} showGlobal={showGlobal}/>
                   </div>
                   {selSDGs.length>0?(
                     <div className="fadein" style={{width:"100%",background:"linear-gradient(135deg,#0a1628,#1e3a5f)",borderRadius:6,padding:"5px 10px",textAlign:"center",marginTop:2,position:"relative",zIndex:1}}>
                       <div style={{display:"flex",flexWrap:"wrap",gap:4,justifyContent:"center",marginBottom:2}}>
-                        {selSDGs.map(id=><span key={id} style={{fontSize:10,fontWeight:700,padding:"2px 10px",borderRadius:20,color:"white",background:SDG_META[id].color}}>{id}: {SDG_META[id].name}</span>)}
+                        {selSDGs.map(id=><span key={id} style={{fontSize:12,fontWeight:700,padding:"2px 10px",borderRadius:20,color:"white",background:SDG_META[id].color}}>{id}: {SDG_META[id].name}</span>)}
                       </div>
-                      <div style={{fontSize:18,fontWeight:900,color:"white"}}>{activePapers} <span style={{fontSize:11,fontWeight:600,color:"#94a3b8"}}>papers</span></div>
+                      <div style={{fontSize:18,fontWeight:900,color:"white"}}>{activePapers} <span style={{fontSize:13,fontWeight:600,color:"#94a3b8"}}>papers</span></div>
                     </div>
                   ):(
-                    <div style={{fontSize:9,color:"#94a3b8",fontStyle:"italic",marginTop:2,position:"relative",zIndex:1}}>Click any SDG to dynamically filter insights</div>
+                    <div style={{fontSize:11,color:"#94a3b8",fontStyle:"italic",marginTop:2,position:"relative",zIndex:1}}>Click any SDG to dynamically filter insights</div>
                   )}
                 </div>
                 <div style={S.card}>
-                  <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:5}}>{selSDGs.length>0?"Relevant Keywords":"Research Keywords"}</div>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:13,marginBottom:5}}>{selSDGs.length>0?"Relevant Keywords":"Research Keywords"}</div>
                   {filteredKeywords.length>0?(
                     <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
                       {filteredKeywords.map((k,i)=>(
-                        <span key={k.word} className="fadein" style={{fontSize:10+(k.count/KW_MAX)*5,padding:"3px 10px",borderRadius:20,color:"white",fontWeight:600,background:KW_COLORS[i%KW_COLORS.length]}}>{k.word}</span>
+                        <span key={k.word} className="fadein" style={{fontSize:12+(k.count/KW_MAX)*5,padding:"3px 10px",borderRadius:20,color:"white",fontWeight:600,background:KW_COLORS[i%KW_COLORS.length]}}>{k.word}</span>
                       ))}
                     </div>
-                  ):(<p style={{fontSize:11,color:"#94a3b8",fontStyle:"italic"}}>No keywords match selected SDGs</p>)}
+                  ):(<p style={{fontSize:13,color:"#94a3b8",fontStyle:"italic"}}>No keywords match selected SDGs</p>)}
                 </div>
                 <div style={S.card}>
-                  <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:1}}>Publication Trend</div>
-                  <div style={{fontSize:9,color:"#16a34a",fontWeight:600,marginBottom:5}}>+347% growth · 2010–2020</div>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:13,marginBottom:1}}>Publication Trend</div>
+                  <div style={{fontSize:11,color:"#16a34a",fontWeight:600,marginBottom:5}}>+347% growth · 2010–2020</div>
                   <div style={{display:"flex",alignItems:"flex-end",gap:2,height:56}}>
                     {YEAR_DATA.map(y=>(
                       <div key={y.year} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3,cursor:"pointer"}} onClick={()=>setSelYear(selYear===String(y.year)?"All":String(y.year))}>
                         <div style={{width:"100%",borderRadius:"4px 4px 0 0",height:`${(y.c/76)*70}px`,background:selYear===String(y.year)?"#e85d26":selSDGs.length>0?"#3F7E44":"#cbd5e1",transition:"all .3s"}} title={`${y.year}: ${y.c}`}/>
-                        <span style={{fontSize:8,color:"#94a3b8"}}>{String(y.year).slice(2)}</span>
+                        <span style={{fontSize:10,color:"#94a3b8"}}>{String(y.year).slice(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -1151,26 +1151,26 @@ function App(){
               <div style={{display:"flex",flexDirection:"column",gap:4}}>
                 <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:0}}>
                   <div style={{width:3,height:3,borderRadius:"50%",background:"#ef4444"}}/>
-                  <div style={{fontWeight:800,fontSize:11,color:"#0f172a",letterSpacing:"-.2px"}}>Gap & Coverage</div>
+                  <div style={{fontWeight:800,fontSize:13,color:"#0f172a",letterSpacing:"-.2px"}}>Gap & Coverage</div>
                   <span style={S.aiTag}>benchmarking</span>
                 </div>
                 {selSDGs.length===1?(
                   <div className="fadein" style={{...S.card,padding:"8px 9px"}}>
-                    <div style={{fontSize:9,fontWeight:700,color:GAP_INDEX[selSDGs[0]]<0?"#ef4444":"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:4}}>SDG {selSDGs[0]}: {SDG_META[selSDGs[0]].name}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:GAP_INDEX[selSDGs[0]]<0?"#ef4444":"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:4}}>SDG {selSDGs[0]}: {SDG_META[selSDGs[0]].name}</div>
                     <GapBar id={selSDGs[0]} gap={GAP_INDEX[selSDGs[0]]}/>
                     <GapClosurePanel selectedSDG={selSDGs[0]}/>
                   </div>
                 ):(
                   <div style={{...S.card,padding:"8px 9px",display:"flex",flexDirection:"column"}}>
-                    <div style={{fontSize:8,fontWeight:700,color:"#ef4444",textTransform:"uppercase",letterSpacing:.8,marginBottom:3}}>Under-Indexed</div>
+                    <div style={{fontSize:10,fontWeight:700,color:"#ef4444",textTransform:"uppercase",letterSpacing:.8,marginBottom:3}}>Under-Indexed</div>
                     {UNDER_INDEXED.slice(0,3).map(({id,gap})=>(
                       <div key={id} style={{marginBottom:4}}>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
                           <div style={{display:"flex",alignItems:"center",gap:5}}>
                             <div style={{width:6,height:6,borderRadius:"50%",background:SDG_META[id].color,flexShrink:0}}/>
-                            <span style={{fontSize:11,fontWeight:600,color:"#475569"}}>{SDG_META[id].name}</span>
+                            <span style={{fontSize:13,fontWeight:600,color:"#475569"}}>{SDG_META[id].name}</span>
                           </div>
-                          <span style={{fontSize:11,fontWeight:800,color:"#ef4444"}}>{gap}pp</span>
+                          <span style={{fontSize:13,fontWeight:800,color:"#ef4444"}}>{gap}pp</span>
                         </div>
                         <div style={{height:5,background:"#f1f5f9",borderRadius:20,overflow:"hidden"}}>
                           <div style={{width:`${Math.min(Math.abs(gap)*8,100)}%`,height:"100%",background:"linear-gradient(90deg,#fca5a5,#ef4444)",borderRadius:20}}/>
@@ -1178,44 +1178,44 @@ function App(){
                       </div>
                     ))}
                     <div style={{height:1,background:"#eef2f7",margin:"2px 0 3px"}}/>
-                    <div style={{fontSize:8,fontWeight:700,color:"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:3}}>Over-Indexed</div>
+                    <div style={{fontSize:10,fontWeight:700,color:"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:3}}>Over-Indexed</div>
                     {OVER_INDEXED.slice(0,3).map(({id,gap})=>(
                       <div key={id} style={{marginBottom:4}}>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
                           <div style={{display:"flex",alignItems:"center",gap:5}}>
                             <div style={{width:6,height:6,borderRadius:"50%",background:SDG_META[id].color,flexShrink:0}}/>
-                            <span style={{fontSize:11,fontWeight:600,color:"#475569"}}>{SDG_META[id].name}</span>
+                            <span style={{fontSize:13,fontWeight:600,color:"#475569"}}>{SDG_META[id].name}</span>
                           </div>
-                          <span style={{fontSize:11,fontWeight:800,color:"#16a34a"}}>+{gap}pp</span>
+                          <span style={{fontSize:13,fontWeight:800,color:"#16a34a"}}>+{gap}pp</span>
                         </div>
                         <div style={{height:5,background:"#f1f5f9",borderRadius:20,overflow:"hidden"}}>
                           <div style={{width:`${Math.min(gap*8,100)}%`,height:"100%",background:"linear-gradient(90deg,#86efac,#16a34a)",borderRadius:20}}/>
                         </div>
                       </div>
                     ))}
-                    <button onClick={()=>setTab("globalimpact")} style={{marginTop:6,width:"100%",fontSize:10,padding:"6px 0",borderRadius:8,background:"#0a1628",border:"none",color:"white",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Full Gap Analysis →</button>
+                    <button onClick={()=>setTab("globalimpact")} style={{marginTop:6,width:"100%",fontSize:12,padding:"6px 0",borderRadius:8,background:"#0a1628",border:"none",color:"white",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Full Gap Analysis →</button>
                   </div>
                 )}
                 <div style={S.card}>
                   <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5}}>
-                    <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Gap Index vs. Global</div>
+                    <div style={{fontWeight:700,color:"#334155",fontSize:13}}>Gap Index vs. Global</div>
                     <span style={S.aiTag}>benchmarking</span>
                   </div>
                   {selSDGs.length===1?(
                     <div className="fadein">
-                      <div style={{fontSize:10,fontWeight:700,color:GAP_INDEX[selSDGs[0]]<0?"#ef4444":"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:6}}>SDG {selSDGs[0]}: {SDG_META[selSDGs[0]].name}</div>
+                      <div style={{fontSize:12,fontWeight:700,color:GAP_INDEX[selSDGs[0]]<0?"#ef4444":"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:6}}>SDG {selSDGs[0]}: {SDG_META[selSDGs[0]].name}</div>
                       <GapBar id={selSDGs[0]} gap={GAP_INDEX[selSDGs[0]]}/>
                       <GapClosurePanel selectedSDG={selSDGs[0]}/>
                     </div>
                   ):(
                     <>
-                      <div style={{fontSize:9,fontWeight:700,color:"#ef4444",textTransform:"uppercase",letterSpacing:.8,marginBottom:4}}>Under-Indexed (top 3)</div>
+                      <div style={{fontSize:11,fontWeight:700,color:"#ef4444",textTransform:"uppercase",letterSpacing:.8,marginBottom:4}}>Under-Indexed (top 3)</div>
                       {UNDER_INDEXED.slice(0,3).map(({id,gap})=><GapBar key={id} id={id} gap={gap}/>)}
-                      <div style={{fontSize:9,fontWeight:700,color:"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginTop:6,marginBottom:4}}>Over-Indexed (top 3)</div>
+                      <div style={{fontSize:11,fontWeight:700,color:"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginTop:6,marginBottom:4}}>Over-Indexed (top 3)</div>
                       {OVER_INDEXED.slice(0,3).map(({id,gap})=><GapBar key={id} id={id} gap={gap}/>)}
                     </>
                   )}
-                  <button onClick={()=>setTab("globalimpact")} style={{marginTop:6,width:"100%",fontSize:11,padding:"7px 0",borderRadius:8,background:"#0a1628",border:"none",color:"white",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Full Gap Analysis →</button>
+                  <button onClick={()=>setTab("globalimpact")} style={{marginTop:6,width:"100%",fontSize:13,padding:"7px 0",borderRadius:8,background:"#0a1628",border:"none",color:"white",cursor:"pointer",fontWeight:600,transition:"all .15s"}}>Full Gap Analysis →</button>
                 </div>
                 <div style={{...S.card,background:"#fafdfb",border:"1px solid #d1fae5",padding:"10px 12px",display:"flex",flexDirection:"column"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
@@ -1223,8 +1223,8 @@ function App(){
                       <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     <div style={{flex:1}}>
-                      <div style={{fontWeight:800,color:"#1a2e1a",fontSize:11,letterSpacing:"-.2px"}}>{selSDGs.length===1?`SDG ${selSDGs[0]} Actions`:"Recommendations"}</div>
-                      <div style={{fontSize:8,color:"#64748b",marginTop:1}}>Prioritized next steps</div>
+                      <div style={{fontWeight:800,color:"#1a2e1a",fontSize:13,letterSpacing:"-.2px"}}>{selSDGs.length===1?`SDG ${selSDGs[0]} Actions`:"Recommendations"}</div>
+                      <div style={{fontSize:10,color:"#64748b",marginTop:1}}>Prioritized next steps</div>
                     </div>
                     <span style={{...S.aiTag,color:"#16a34a",background:"#f0fdf4",border:"1px solid #bbf7d0"}}>AI</span>
                   </div>
@@ -1233,12 +1233,12 @@ function App(){
                       {recommendations.map((rec,i)=>(
                         <div key={i}>
                           <div style={{display:"flex",gap:5,padding:"4px 7px",background:"white",borderRadius:5,border:expandedRec===i?"1px solid #86efac":"1px solid #eef2f7",cursor:"pointer",alignItems:"center",transition:"all .15s"}} onClick={()=>setExpandedRec(expandedRec===i?null:i)}>
-                            <div style={{width:16,height:16,borderRadius:4,background:expandedRec===i?"#16a34a":"#f0fdf4",display:"flex",alignItems:"center",justifyContent:"center",color:expandedRec===i?"white":"#16a34a",fontSize:7,fontWeight:800,flexShrink:0,transition:"all .15s",border:expandedRec===i?"none":"1px solid #d1fae5"}}>{i+1}</div>
-                            <p style={{fontSize:10,color:"#334155",lineHeight:1.4,margin:0,flex:1,fontWeight:500}}>{rec.bullet}</p>
-                            <span style={{fontSize:8,color:"#94a3b8",flexShrink:0,transition:"transform .15s",transform:expandedRec===i?"rotate(180deg)":"none"}}>▼</span>
+                            <div style={{width:16,height:16,borderRadius:4,background:expandedRec===i?"#16a34a":"#f0fdf4",display:"flex",alignItems:"center",justifyContent:"center",color:expandedRec===i?"white":"#16a34a",fontSize:9,fontWeight:800,flexShrink:0,transition:"all .15s",border:expandedRec===i?"none":"1px solid #d1fae5"}}>{i+1}</div>
+                            <p style={{fontSize:12,color:"#334155",lineHeight:1.4,margin:0,flex:1,fontWeight:500}}>{rec.bullet}</p>
+                            <span style={{fontSize:10,color:"#94a3b8",flexShrink:0,transition:"transform .15s",transform:expandedRec===i?"rotate(180deg)":"none"}}>▼</span>
                           </div>
                           {expandedRec===i&&(
-                            <div className="fadein" style={{padding:"4px 8px 4px 30px",fontSize:9,color:"#64748b",lineHeight:1.5,background:"#f8fafb",borderRadius:"0 0 6px 6px",borderTop:"1px dashed #d1fae5"}}>{rec.rationale}</div>
+                            <div className="fadein" style={{padding:"4px 8px 4px 30px",fontSize:11,color:"#64748b",lineHeight:1.5,background:"#f8fafb",borderRadius:"0 0 6px 6px",borderTop:"1px dashed #d1fae5"}}>{rec.rationale}</div>
                           )}
                         </div>
                       ))}
@@ -1255,17 +1255,17 @@ function App(){
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             {personaView==="student"&&(
               <div className="fadein" style={{background:"linear-gradient(135deg,#eef2ff,#e0e7ff)",borderRadius:8,padding:"7px 12px",border:"1px solid #c7d2fe",display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:13}}>🎓</span>
+                <span style={{fontSize:15}}>🎓</span>
                 <div>
-                  <div style={{fontSize:10,fontWeight:700,color:"#3730a3"}}>Student Research View</div>
-                  <div style={{fontSize:9,color:"#4338ca"}}>Explore researcher profiles and collaboration opportunities.</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#3730a3"}}>Student Research View</div>
+                  <div style={{fontSize:11,color:"#4338ca"}}>Explore researcher profiles and collaboration opportunities.</div>
                 </div>
               </div>
             )}
             <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:10}}>
               <div style={S.card}>
-                <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:1}}>Collaboration Network</div>
-                <p style={{fontSize:9,color:"#94a3b8",marginBottom:8}}>Click a department to see suggested pairings</p>
+                <div style={{fontWeight:700,color:"#334155",fontSize:14,marginBottom:1}}>Collaboration Network</div>
+                <p style={{fontSize:11,color:"#94a3b8",marginBottom:8}}>Click a department to see suggested pairings</p>
                 <svg viewBox="0 0 600 320" style={{width:"100%",height:220}}>
                   {NET_LINKS.map(([a,b],i)=>{const n1=NET_NODES.find(n=>n.dept===a),n2=NET_NODES.find(n=>n.dept===b);return <line key={i} x1={n1.x} y1={n1.y} x2={n2.x} y2={n2.y} stroke="#e2e8f0" strokeWidth="2"/>;
                   })}
@@ -1284,50 +1284,50 @@ function App(){
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 <div style={S.card}>
-                  <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:5}}>{netDept?`${netDept} — Pairs`:"Select a Department"}</div>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:13,marginBottom:5}}>{netDept?`${netDept} — Pairs`:"Select a Department"}</div>
                   {netDept&&COLLAB_PAIRS[netDept]?(
                     <div style={{display:"flex",flexDirection:"column",gap:7}}>
                       {COLLAB_PAIRS[netDept].map((p,i)=>(
                         <div key={i} className="fadein" style={{background:selectedPairing===i?"#eff6ff":"#f8fafc",borderRadius:7,padding:9,border:`1px solid ${selectedPairing===i?"#bfdbfe":"#f1f5f9"}`,cursor:"pointer",transition:"all .2s"}} onClick={()=>setSelectedPairing(selectedPairing===i?null:i)}>
-                          <div style={{fontSize:11,fontWeight:700,color:"#334155",marginBottom:2,lineHeight:1.3}}>{p.pair}</div>
-                          <div style={{fontSize:10,color:"#64748b",marginBottom:5}}>{p.outcome}</div>
+                          <div style={{fontSize:13,fontWeight:700,color:"#334155",marginBottom:2,lineHeight:1.3}}>{p.pair}</div>
+                          <div style={{fontSize:12,color:"#64748b",marginBottom:5}}>{p.outcome}</div>
                           <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                            <span style={{fontSize:9,padding:"2px 6px",borderRadius:20,background:"#fff7ed",color:"#c2410c",fontWeight:700}}>{p.sdgs}</span>
-                            {p.sharedSdgs.map(s=><span key={s} style={{fontSize:9,padding:"2px 6px",borderRadius:20,background:SDG_META[s]?.color+"20",color:SDG_META[s]?.color,fontWeight:700}}>SDG {s}</span>)}
+                            <span style={{fontSize:11,padding:"2px 6px",borderRadius:20,background:"#fff7ed",color:"#c2410c",fontWeight:700}}>{p.sdgs}</span>
+                            {p.sharedSdgs.map(s=><span key={s} style={{fontSize:11,padding:"2px 6px",borderRadius:20,background:SDG_META[s]?.color+"20",color:SDG_META[s]?.color,fontWeight:700}}>SDG {s}</span>)}
                           </div>
                         </div>
                       ))}
                       {selectedPairing!==null&&COLLAB_PAIRS[netDept][selectedPairing]&&<PairingPreview pair={COLLAB_PAIRS[netDept][selectedPairing]}/>}
                     </div>
-                  ):(<p style={{fontSize:11,color:"#94a3b8",fontStyle:"italic"}}>Click a department node to see pairings.</p>)}
+                  ):(<p style={{fontSize:13,color:"#94a3b8",fontStyle:"italic"}}>Click a department node to see pairings.</p>)}
                 </div>
                 <div style={S.card}>
-                  <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:8}}>Pairing Methodology</div>
-                  <div style={{fontSize:10,color:"#475569",lineHeight:1.6,marginBottom:10}}>Collaboration pairings are identified from shared SDG indexing in the dataset. Researchers assigned to the same SDGs by the classification pipeline are surfaced as potential collaborators.</div>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:14,marginBottom:8}}>Pairing Methodology</div>
+                  <div style={{fontSize:12,color:"#475569",lineHeight:1.6,marginBottom:10}}>Collaboration pairings are identified from shared SDG indexing in the dataset. Researchers assigned to the same SDGs by the classification pipeline are surfaced as potential collaborators.</div>
                   {[{l:"Shared SDG Indexing",desc:"Both researchers indexed to same SDG by FAISS pipeline",c:"#e85d26"},{l:"Department Diversity",desc:"Cross-department pairings flagged for interdisciplinary potential",c:"#3F7E44"},{l:"Paper Volume",desc:"Combined paper count used as proxy for research depth",c:"#0A97D9"}].map(m=>(
                     <div key={m.l} style={{marginBottom:8,padding:"6px 8px",background:"#f8fafc",borderRadius:6,borderLeft:`3px solid ${m.c}`}}>
-                      <div style={{fontSize:10,fontWeight:700,color:"#334155",marginBottom:1}}>{m.l}</div>
-                      <div style={{fontSize:9,color:"#64748b"}}>{m.desc}</div>
+                      <div style={{fontSize:12,fontWeight:700,color:"#334155",marginBottom:1}}>{m.l}</div>
+                      <div style={{fontSize:11,color:"#64748b"}}>{m.desc}</div>
                     </div>
                   ))}
-                  <div style={{fontSize:8,color:"#94a3b8",marginTop:4,fontStyle:"italic",lineHeight:1.5}}>No numeric compatibility scores are assigned. Predicting collaboration success requires qualitative assessment beyond bibliometric co-indexing.</div>
+                  <div style={{fontSize:10,color:"#94a3b8",marginTop:4,fontStyle:"italic",lineHeight:1.5}}>No numeric compatibility scores are assigned. Predicting collaboration success requires qualitative assessment beyond bibliometric co-indexing.</div>
                 </div>
               </div>
             </div>
             <div style={S.card}>
-              <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:7}}>All Sustainability Researchers</div>
+              <div style={{fontWeight:700,color:"#334155",fontSize:14,marginBottom:7}}>All Sustainability Researchers</div>
               <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:6}}>
                 {RESEARCHERS.map(r=>(
                   <div key={r.name} onClick={()=>setSelectedFaculty(r)} style={{padding:8,background:"#f8fafc",borderRadius:7,border:"1px solid #f1f5f9",cursor:"pointer",transition:"background .15s"}}
                     onMouseEnter={e=>e.currentTarget.style.background="#eef2f7"}
                     onMouseLeave={e=>e.currentTarget.style.background="#f8fafc"}>
-                    <div style={{fontWeight:700,color:"#334155",fontSize:10,marginBottom:1}}>{r.name}</div>
-                    <div style={{fontSize:8,color:"#94a3b8",marginBottom:4}}>{r.dept}</div>
+                    <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:1}}>{r.name}</div>
+                    <div style={{fontSize:10,color:"#94a3b8",marginBottom:4}}>{r.dept}</div>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                       <span style={{fontSize:16,fontWeight:900,color:"#e85d26"}}>{r.count}</span>
-                      <span style={{fontSize:8,padding:"2px 5px",borderRadius:20,color:"white",fontWeight:700,background:SDG_META[r.topSdg]?.color||"#64748b"}}>SDG {r.topSdg}</span>
+                      <span style={{fontSize:10,padding:"2px 5px",borderRadius:20,color:"white",fontWeight:700,background:SDG_META[r.topSdg]?.color||"#64748b"}}>SDG {r.topSdg}</span>
                     </div>
-                    <div style={{fontSize:7,color:"#94a3b8",marginTop:3}}>View profile →</div>
+                    <div style={{fontSize:9,color:"#94a3b8",marginTop:3}}>View profile →</div>
                   </div>
                 ))}
               </div>
@@ -1340,25 +1340,25 @@ function App(){
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"3fr 2fr",gap:8}}>
               <div style={S.card}>
-                <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:7}}>Geospatial Research Reach</div>
+                <div style={{fontWeight:700,color:"#334155",fontSize:14,marginBottom:7}}>Geospatial Research Reach</div>
                 <WorldMap/>
                 <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:6}}>
                   {Object.entries(COUNTRY_DATA).sort((a,b)=>b[1].count-a[1].count).map(([c,d])=>(
-                    <span key={c} style={{fontSize:9,color:"#64748b"}}><strong style={{color:"#334155"}}>{c}</strong> {d.count}</span>
+                    <span key={c} style={{fontSize:11,color:"#64748b"}}><strong style={{color:"#334155"}}>{c}</strong> {d.count}</span>
                   ))}
                 </div>
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 <div style={S.card}>
-                  <div style={{fontWeight:700,color:"#334155",fontSize:11,marginBottom:6}}>SDG Coverage</div>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:13,marginBottom:6}}>SDG Coverage</div>
                   <div style={{display:"flex",flexDirection:"column",gap:3}}>
                     {Object.entries(SDG_META).map(([id,s])=>{
                       const gies=SDG_COUNTS[Number(id)]||0;
                       return (
                         <div key={id} style={{display:"flex",alignItems:"center",gap:5}}>
-                          <span style={{fontSize:8,color:"#94a3b8",width:34}}>SDG {id}</span>
+                          <span style={{fontSize:10,color:"#94a3b8",width:34}}>SDG {id}</span>
                           <div style={{flex:1,height:6,background:"#f1f5f9",borderRadius:20,overflow:"hidden"}}><div style={{width:`${(gies/141)*100}%`,height:"100%",background:s.color,borderRadius:20}}/></div>
-                          <span style={{fontSize:9,fontWeight:700,width:20,textAlign:"right",color:gies===0?"#ef4444":s.color}}>{gies===0?"—":gies}</span>
+                          <span style={{fontSize:11,fontWeight:700,width:20,textAlign:"right",color:gies===0?"#ef4444":s.color}}>{gies===0?"—":gies}</span>
                         </div>
                       );
                     })}
@@ -1366,12 +1366,12 @@ function App(){
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                   <div style={{background:"#f0fdf4",borderRadius:9,padding:10,border:"1px solid #d1fae5"}}>
-                    <div style={{fontSize:9,fontWeight:700,color:"#15803d",marginBottom:4}}>Well Covered</div>
-                    {[3,10,8,9,17].map(id=><div key={id} style={{fontSize:10,color:"#15803d",marginBottom:2}}>SDG {id}: {SDG_COUNTS[id]}</div>)}
+                    <div style={{fontSize:11,fontWeight:700,color:"#15803d",marginBottom:4}}>Well Covered</div>
+                    {[3,10,8,9,17].map(id=><div key={id} style={{fontSize:12,color:"#15803d",marginBottom:2}}>SDG {id}: {SDG_COUNTS[id]}</div>)}
                   </div>
                   <div style={{background:"#fff1f2",borderRadius:9,padding:10,border:"1px solid #fecdd3"}}>
-                    <div style={{fontSize:9,fontWeight:700,color:"#be123c",marginBottom:4}}>Critical Gaps</div>
-                    {[14,15,6,2,11].map(id=><div key={id} style={{fontSize:10,color:"#be123c",marginBottom:2}}>SDG {id}: {SDG_COUNTS[id]||0}</div>)}
+                    <div style={{fontSize:11,fontWeight:700,color:"#be123c",marginBottom:4}}>Critical Gaps</div>
+                    {[14,15,6,2,11].map(id=><div key={id} style={{fontSize:12,color:"#be123c",marginBottom:2}}>SDG {id}: {SDG_COUNTS[id]||0}</div>)}
                   </div>
                 </div>
               </div>
@@ -1379,37 +1379,37 @@ function App(){
             <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:10}}>
               <div style={S.card}>
                 <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6}}>
-                  <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Gap Index Ranking</div>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:13}}>Gap Index Ranking</div>
                   <span style={S.aiTag}>benchmarking</span>
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                   <div>
-                    <div style={{fontSize:9,fontWeight:700,color:"#ef4444",textTransform:"uppercase",letterSpacing:.8,marginBottom:5}}>Under-Indexed (Top 5)</div>
+                    <div style={{fontSize:11,fontWeight:700,color:"#ef4444",textTransform:"uppercase",letterSpacing:.8,marginBottom:5}}>Under-Indexed (Top 5)</div>
                     {UNDER_INDEXED.map(({id,gap})=><GapBar key={id} id={id} gap={gap}/>)}
                   </div>
                   <div>
-                    <div style={{fontSize:9,fontWeight:700,color:"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:5}}>Over-Indexed (Top 5)</div>
+                    <div style={{fontSize:11,fontWeight:700,color:"#16a34a",textTransform:"uppercase",letterSpacing:.8,marginBottom:5}}>Over-Indexed (Top 5)</div>
                     {OVER_INDEXED.map(({id,gap})=><GapBar key={id} id={id} gap={gap}/>)}
                   </div>
                 </div>
               </div>
               <div style={{...S.card,background:"#fafafe",border:"1px solid #eee8f7"}}>
                 <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6}}>
-                  <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Global Alignment Insights</div>
+                  <div style={{fontWeight:700,color:"#334155",fontSize:13}}>Global Alignment Insights</div>
                   <span style={{...S.aiTag,color:"#7c3aed",background:"#f3e8ff",border:"1px solid #e9d5ff"}}>AI-assisted</span>
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
                   {globalInsights.map((insight,i)=>(
                     <div key={i} style={{display:"flex",gap:6,padding:"6px 9px",background:"white",borderRadius:6,border:"1px solid #f1f5f9"}}>
-                      <span style={{fontSize:10,color:"#7c3aed",fontWeight:800,flexShrink:0,marginTop:1}}>{i+1}</span>
-                      <p style={{fontSize:11,color:"#475569",lineHeight:1.5,margin:0}}>{insight}</p>
+                      <span style={{fontSize:12,color:"#7c3aed",fontWeight:800,flexShrink:0,marginTop:1}}>{i+1}</span>
+                      <p style={{fontSize:13,color:"#475569",lineHeight:1.5,margin:0}}>{insight}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
             <div style={S.card}>
-              <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:7}}>All 17 SDGs at Gies</div>
+              <div style={{fontWeight:700,color:"#334155",fontSize:14,marginBottom:7}}>All 17 SDGs at Gies</div>
               <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(3,1fr)":"repeat(6,1fr)",gap:5}}>
                 {Object.entries(SDG_META).map(([id,s])=>{
                   const gies=SDG_COUNTS[Number(id)]||0;
@@ -1417,11 +1417,11 @@ function App(){
                   const priority=getPriorityTag(gap);
                   return (
                     <div key={id} style={{background:"white",borderRadius:6,padding:7,borderLeft:`3px solid ${s.color}`,boxShadow:"0 1px 2px rgba(0,0,0,.03)"}}>
-                      <div style={{fontSize:8,fontWeight:600,color:"#94a3b8",marginBottom:1}}>SDG {id}</div>
-                      <div style={{fontSize:10,fontWeight:700,color:"#334155",lineHeight:1.3,marginBottom:3}}>{s.name}</div>
+                      <div style={{fontSize:10,fontWeight:600,color:"#94a3b8",marginBottom:1}}>SDG {id}</div>
+                      <div style={{fontSize:12,fontWeight:700,color:"#334155",lineHeight:1.3,marginBottom:3}}>{s.name}</div>
                       <div style={{fontSize:16,fontWeight:900,color:gies===0?"#ef4444":s.color}}>{gies===0?"0":gies}</div>
-                      <div style={{fontSize:9,color:gap<0?"#ef4444":"#16a34a",fontWeight:700,marginTop:1}}>{gap>=0?"+":""}{gap}pp</div>
-                      <div style={{marginTop:3,fontSize:7,fontWeight:600,padding:"1px 4px",borderRadius:8,display:"inline-block",color:priority.color,background:priority.bg,border:`1px solid ${priority.border}`}}>{priority.label}</div>
+                      <div style={{fontSize:11,color:gap<0?"#ef4444":"#16a34a",fontWeight:700,marginTop:1}}>{gap>=0?"+":""}{gap}pp</div>
+                      <div style={{marginTop:3,fontSize:9,fontWeight:600,padding:"1px 4px",borderRadius:8,display:"inline-block",color:priority.color,background:priority.bg,border:`1px solid ${priority.border}`}}>{priority.label}</div>
                     </div>
                   );
                 })}
@@ -1437,15 +1437,15 @@ function App(){
             {/* Header */}
             <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
               <div>
-                <div style={{fontWeight:900,fontSize:17,color:"#0f172a",letterSpacing:"-.3px"}}>Collaboration Hub</div>
-                <p style={{fontSize:11,color:"#64748b",marginTop:2,maxWidth:560}}>
+                <div style={{fontWeight:900,fontSize:19,color:"#0f172a",letterSpacing:"-.3px"}}>Collaboration Hub</div>
+                <p style={{fontSize:13,color:"#64748b",marginTop:2,maxWidth:560}}>
                   Connect Gies sustainability research with external partners, case competitions, and sponsorship opportunities.
                   Powered by the <strong>Sustainability Case Competition</strong> portal.
                 </p>
               </div>
               <a href="https://sustainabilitycasecompetition-hmdgpbamcag9wrotla87c4.streamlit.app/#sponsor-a-priority"
                 target="_blank" rel="noopener noreferrer"
-                style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 16px",borderRadius:8,background:"#0a1628",color:"white",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0}}>
+                style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 16px",borderRadius:8,background:"#0a1628",color:"white",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>
                 Open full screen ↗
               </a>
             </div>
@@ -1461,7 +1461,7 @@ function App(){
                 <a key={p.label}
                   href={`https://sustainabilitycasecompetition-hmdgpbamcag9wrotla87c4.streamlit.app/${p.anchor}`}
                   target="_blank" rel="noopener noreferrer"
-                  style={{fontSize:10,fontWeight:600,padding:"5px 13px",borderRadius:20,color:"white",background:p.color}}>
+                  style={{fontSize:12,fontWeight:600,padding:"5px 13px",borderRadius:20,color:"white",background:p.color}}>
                   {p.label}
                 </a>
               ))}
@@ -1470,7 +1470,7 @@ function App(){
             {/* Context strip */}
             <div style={{background:"linear-gradient(135deg,#eff6ff,#dbeafe)",borderRadius:8,padding:"8px 14px",border:"1px solid #bfdbfe",display:"flex",alignItems:"flex-start",gap:10}}>
               <span style={{fontSize:16,flexShrink:0}}>🔗</span>
-              <div style={{fontSize:10,color:"#1e40af",lineHeight:1.6}}>
+              <div style={{fontSize:12,color:"#1e40af",lineHeight:1.6}}>
                 <strong>How this connects:</strong> The portal below surfaces SDG sponsorship priorities sourced from the same gap analysis powering this dashboard.
                 Gies under-indexed SDGs (SDG 14, 15, 2) map directly to open sponsorship tracks.
                 Use the <strong>Overview tab</strong> to identify gaps, then come here to match them with funding opportunities.
@@ -1487,11 +1487,11 @@ function App(){
                     <div style={{width:8,height:8,borderRadius:"50%",background:"#fbbf24"}}/>
                     <div style={{width:8,height:8,borderRadius:"50%",background:"#4ade80"}}/>
                   </div>
-                  <span style={{color:"#64748b",fontSize:10,marginLeft:6,fontFamily:"monospace"}}>sustainabilitycasecompetition · streamlit.app</span>
+                  <span style={{color:"#64748b",fontSize:12,marginLeft:6,fontFamily:"monospace"}}>sustainabilitycasecompetition · streamlit.app</span>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
                   <div className="pulse-dot" style={{width:5,height:5,borderRadius:"50%",background:"#4ade80"}}/>
-                  <span style={{color:"#4ade80",fontSize:9,fontWeight:600}}>Live</span>
+                  <span style={{color:"#4ade80",fontSize:11,fontWeight:600}}>Live</span>
                 </div>
               </div>
               <iframe
@@ -1512,8 +1512,8 @@ function App(){
               ].map(c=>(
                 <div key={c.title} style={{background:c.bg,borderRadius:8,padding:"10px 12px",border:`1px solid ${c.border}`}}>
                   <div style={{fontSize:16,marginBottom:5}}>{c.icon}</div>
-                  <div style={{fontWeight:700,fontSize:11,color:c.color,marginBottom:3}}>{c.title}</div>
-                  <p style={{fontSize:10,color:"#475569",lineHeight:1.5,margin:0}}>{c.body}</p>
+                  <div style={{fontWeight:700,fontSize:13,color:c.color,marginBottom:3}}>{c.title}</div>
+                  <p style={{fontSize:12,color:"#475569",lineHeight:1.5,margin:0}}>{c.body}</p>
                 </div>
               ))}
             </div>
@@ -1525,10 +1525,10 @@ function App(){
         {tab==="personas"&&(
           <div style={{display:"flex",flexDirection:"column",gap:12}} className="view-transition">
             <div>
-              <div style={{fontWeight:900,fontSize:17,color:"#0f172a"}}>User Journey Maps</div>
-              <p style={{fontSize:11,color:"#64748b",marginTop:2}}>How the dashboard transforms two real stakeholder experiences.</p>
-              <div style={{marginTop:6,padding:"5px 10px",background:"#f0f9ff",borderRadius:7,border:"1px solid #bae6fd",fontSize:9,color:"#0369a1",display:"flex",alignItems:"center",gap:5}}>
-                <span style={{fontSize:12}}>💡</span>
+              <div style={{fontWeight:900,fontSize:19,color:"#0f172a"}}>User Journey Maps</div>
+              <p style={{fontSize:13,color:"#64748b",marginTop:2}}>How the dashboard transforms two real stakeholder experiences.</p>
+              <div style={{marginTop:6,padding:"5px 10px",background:"#f0f9ff",borderRadius:7,border:"1px solid #bae6fd",fontSize:11,color:"#0369a1",display:"flex",alignItems:"center",gap:5}}>
+                <span style={{fontSize:14}}>💡</span>
                 <span>Use the <strong>Donor / Student</strong> toggle in the header to filter the full dashboard to each persona's view.</span>
               </div>
             </div>
@@ -1572,16 +1572,16 @@ function App(){
                   <div style={{width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"white",border:"2px solid rgba(255,255,255,.3)",flexShrink:0}}>{p.avatar}</div>
                   <div style={{flex:1}}>
                     <div style={{fontWeight:900,color:"white",fontSize:14}}>{p.name}, {p.age} — <span style={{fontWeight:500,opacity:.8}}>{p.role}</span></div>
-                    <div style={{fontSize:10,color:"rgba(255,255,255,.65)",marginTop:2,fontStyle:"italic"}}>"{p.quote}"</div>
+                    <div style={{fontSize:12,color:"rgba(255,255,255,.65)",marginTop:2,fontStyle:"italic"}}>"{p.quote}"</div>
                   </div>
                   <div style={{display:isMobile?"none":"grid",gridTemplateColumns:"1fr 1fr",gap:6,flexShrink:0}}>
                     <div style={{background:"rgba(255,255,255,.1)",borderRadius:7,padding:"5px 9px",textAlign:"center"}}>
-                      <div style={{fontSize:8,color:"rgba(255,255,255,.5)",marginBottom:1}}>GOAL</div>
-                      <div style={{fontSize:9,color:"white",fontWeight:600,lineHeight:1.3}}>{p.goal}</div>
+                      <div style={{fontSize:10,color:"rgba(255,255,255,.5)",marginBottom:1}}>GOAL</div>
+                      <div style={{fontSize:11,color:"white",fontWeight:600,lineHeight:1.3}}>{p.goal}</div>
                     </div>
                     <div style={{background:"rgba(255,255,255,.1)",borderRadius:7,padding:"5px 9px",textAlign:"center"}}>
-                      <div style={{fontSize:8,color:"rgba(255,255,255,.5)",marginBottom:1}}>PAIN POINT</div>
-                      <div style={{fontSize:9,color:"white",fontWeight:600,lineHeight:1.3}}>{p.pain}</div>
+                      <div style={{fontSize:10,color:"rgba(255,255,255,.5)",marginBottom:1}}>PAIN POINT</div>
+                      <div style={{fontSize:11,color:"white",fontWeight:600,lineHeight:1.3}}>{p.pain}</div>
                     </div>
                   </div>
                 </div>
@@ -1589,49 +1589,49 @@ function App(){
                   {/* Status quo vs. with dashboard */}
                   <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:8}}>
                     <div style={{background:"#fff1f2",borderRadius:8,padding:"8px 12px",border:"1px solid #fecaca"}}>
-                      <div style={{fontSize:8,fontWeight:700,color:"#be123c",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>❌ Status Quo (Before)</div>
-                      <div style={{fontSize:9,color:"#7f1d1d",lineHeight:1.6}}>{p.statusQuo}</div>
+                      <div style={{fontSize:10,fontWeight:700,color:"#be123c",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>❌ Status Quo (Before)</div>
+                      <div style={{fontSize:11,color:"#7f1d1d",lineHeight:1.6}}>{p.statusQuo}</div>
                     </div>
                     <div style={{background:"#f0fdf4",borderRadius:8,padding:"8px 12px",border:"1px solid #bbf7d0"}}>
-                      <div style={{fontSize:8,fontWeight:700,color:"#15803d",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>✅ With Dashboard (After)</div>
-                      <div style={{fontSize:9,color:"#14532d",lineHeight:1.6}}>{p.withDashboard}</div>
+                      <div style={{fontSize:10,fontWeight:700,color:"#15803d",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>✅ With Dashboard (After)</div>
+                      <div style={{fontSize:11,color:"#14532d",lineHeight:1.6}}>{p.withDashboard}</div>
                     </div>
                   </div>
                   {/* Journey steps */}
                   <div>
-                    <div style={{fontSize:8,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1.5,marginBottom:8}}>Journey Map</div>
+                    <div style={{fontSize:10,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1.5,marginBottom:8}}>Journey Map</div>
                     <div style={{display:"flex",alignItems:"stretch",gap:0,position:"relative"}}>
                       {p.steps.map((s,i)=>(
                         <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",textAlign:"center",position:"relative"}}>
                           {/* Connector line */}
                           {i<p.steps.length-1&&<div style={{position:"absolute",top:18,left:"50%",right:"-50%",height:2,background:`linear-gradient(90deg,${p.color}60,${p.color}20)`,zIndex:0}}/>}
                           <div style={{width:36,height:36,borderRadius:"50%",background:i===p.steps.length-1?p.color:"white",border:`2px solid ${p.color}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,zIndex:1,boxShadow:"0 2px 6px rgba(0,0,0,.08)",marginBottom:6}}>{s.icon}</div>
-                          <div style={{fontSize:9,fontWeight:700,color:"#334155",lineHeight:1.2,marginBottom:2}}>{s.l}</div>
-                          <div style={{fontSize:8,color:"#64748b",marginBottom:3}}>{s.d}</div>
-                          <div style={{fontSize:7,padding:"2px 6px",borderRadius:20,background:p.color+"15",color:p.color,fontWeight:600}}>{s.emotion}</div>
+                          <div style={{fontSize:11,fontWeight:700,color:"#334155",lineHeight:1.2,marginBottom:2}}>{s.l}</div>
+                          <div style={{fontSize:10,color:"#64748b",marginBottom:3}}>{s.d}</div>
+                          <div style={{fontSize:9,padding:"2px 6px",borderRadius:20,background:p.color+"15",color:p.color,fontWeight:600}}>{s.emotion}</div>
                         </div>
                       ))}
                     </div>
                   </div>
                   {/* Features used + outcome */}
                   <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-                    <div style={{fontSize:8,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1}}>Features used:</div>
-                    {p.features.map(f=><span key={f} style={{fontSize:8,padding:"2px 8px",borderRadius:20,background:p.color+"12",color:p.color,fontWeight:600,border:`1px solid ${p.color}25`}}>{f}</span>)}
+                    <div style={{fontSize:10,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1}}>Features used:</div>
+                    {p.features.map(f=><span key={f} style={{fontSize:10,padding:"2px 8px",borderRadius:20,background:p.color+"12",color:p.color,fontWeight:600,border:`1px solid ${p.color}25`}}>{f}</span>)}
                     <div style={{marginLeft:"auto",display:"flex",gap:6}}>
                       <div style={{background:"#f8fafc",borderRadius:6,padding:"4px 10px",borderLeft:`3px solid ${p.color}`,textAlign:"center"}}>
-                        <div style={{fontSize:7,color:"#94a3b8",fontWeight:700}}>OUTCOME</div>
-                        <div style={{fontSize:9,fontWeight:700,color:"#334155"}}>{p.outcome}</div>
+                        <div style={{fontSize:9,color:"#94a3b8",fontWeight:700}}>OUTCOME</div>
+                        <div style={{fontSize:11,fontWeight:700,color:"#334155"}}>{p.outcome}</div>
                       </div>
                       <div style={{background:"#f0fdf4",borderRadius:6,padding:"4px 10px",borderLeft:"3px solid #16a34a",textAlign:"center"}}>
-                        <div style={{fontSize:7,color:"#94a3b8",fontWeight:700}}>TIME TO VALUE</div>
-                        <div style={{fontSize:9,fontWeight:700,color:"#16a34a"}}>{p.time}</div>
+                        <div style={{fontSize:9,color:"#94a3b8",fontWeight:700}}>TIME TO VALUE</div>
+                        <div style={{fontSize:11,fontWeight:700,color:"#16a34a"}}>{p.time}</div>
                       </div>
                     </div>
                   </div>
                   {/* Improvement over status quo */}
                   <div style={{background:"linear-gradient(135deg,#f8fafc,#f1f5f9)",borderRadius:7,padding:"7px 12px",borderLeft:`3px solid ${p.accentColor}`,display:"flex",alignItems:"center",gap:8}}>
                     <span style={{fontSize:14}}>💡</span>
-                    <div style={{fontSize:9,color:"#475569",lineHeight:1.5}}><strong style={{color:"#334155"}}>How this improves the status quo:</strong> {p.improvement}</div>
+                    <div style={{fontSize:11,color:"#475569",lineHeight:1.5}}><strong style={{color:"#334155"}}>How this improves the status quo:</strong> {p.improvement}</div>
                   </div>
                 </div>
               </div>
@@ -1662,14 +1662,14 @@ function App(){
                   </div>
                   <div>
                     <div style={{fontWeight:800,fontSize:14,color:"#0f172a",lineHeight:1}}>Research Intelligence</div>
-                    <div style={{fontSize:10,color:"#94a3b8",marginTop:3}}>AI-assisted decision support</div>
+                    <div style={{fontSize:12,color:"#94a3b8",marginTop:3}}>AI-assisted decision support</div>
                   </div>
                 </div>
                 <button onClick={()=>setChatOpen(false)} style={{width:28,height:28,borderRadius:7,border:"1px solid #e2e8f0",background:"#f8fafc",color:"#64748b",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
               </div>
               <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
                 {["Climate researchers?","Biggest gaps?","Growth trends?","Top departments?","Recommendations?"].map(p=>(
-                  <button key={p} onClick={()=>setChatInput(p)} style={{fontSize:10,padding:"5px 12px",borderRadius:20,border:"1px solid #e2e8f0",color:"#475569",background:"white",cursor:"pointer",fontWeight:500}}>{p}</button>
+                  <button key={p} onClick={()=>setChatInput(p)} style={{fontSize:12,padding:"5px 12px",borderRadius:20,border:"1px solid #e2e8f0",color:"#475569",background:"white",cursor:"pointer",fontWeight:500}}>{p}</button>
                 ))}
               </div>
             </div>
@@ -1677,13 +1677,13 @@ function App(){
               {chatMsgs.length===0&&(
                 <div style={{textAlign:"center",paddingTop:40,color:"#94a3b8"}}>
                   <div style={{width:48,height:48,borderRadius:16,background:"#f1f5f9",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",fontSize:20}}>💡</div>
-                  <div style={{fontWeight:700,fontSize:13,color:"#64748b",marginBottom:4}}>Ask anything about Gies research</div>
-                  <div style={{fontSize:11,lineHeight:1.6,maxWidth:260,margin:"0 auto"}}>SDG gaps, researcher profiles, department output, collaboration opportunities, or strategic recommendations.</div>
+                  <div style={{fontWeight:700,fontSize:15,color:"#64748b",marginBottom:4}}>Ask anything about Gies research</div>
+                  <div style={{fontSize:13,lineHeight:1.6,maxWidth:260,margin:"0 auto"}}>SDG gaps, researcher profiles, department output, collaboration opportunities, or strategic recommendations.</div>
                 </div>
               )}
               {chatMsgs.map((m,i)=>(
                 <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}} className="fadein">
-                  <div style={{maxWidth:"82%",padding:"10px 14px",borderRadius:m.role==="user"?"14px 14px 4px 14px":"14px 14px 14px 4px",fontSize:12,lineHeight:1.6,whiteSpace:"pre-line",background:m.role==="user"?"#0a1628":"#f8fafc",color:m.role==="user"?"white":"#334155",border:m.role==="ai"?"1px solid #e2e8f0":"none"}}>{m.text}</div>
+                  <div style={{maxWidth:"82%",padding:"10px 14px",borderRadius:m.role==="user"?"14px 14px 4px 14px":"14px 14px 14px 4px",fontSize:14,lineHeight:1.6,whiteSpace:"pre-line",background:m.role==="user"?"#0a1628":"#f8fafc",color:m.role==="user"?"white":"#334155",border:m.role==="ai"?"1px solid #e2e8f0":"none"}}>{m.text}</div>
                 </div>
               ))}
               {chatLoad&&(
@@ -1696,11 +1696,11 @@ function App(){
               <div style={{display:"flex",gap:6}}>
                 <input value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleChat()}
                   placeholder="Ask about SDGs, researchers, or strategy..."
-                  style={{flex:1,padding:"9px 14px",background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,fontSize:11,outline:"none"}}/>
+                  style={{flex:1,padding:"9px 14px",background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,fontSize:13,outline:"none"}}/>
                 <button onClick={handleChat} disabled={chatLoad||!chatInput.trim()}
-                  style={{padding:"9px 14px",borderRadius:10,color:"white",background:"linear-gradient(135deg,#6366f1,#4f46e5)",border:"none",fontWeight:700,fontSize:11,cursor:"pointer",opacity:chatLoad||!chatInput.trim()?0.4:1}}>Send</button>
+                  style={{padding:"9px 14px",borderRadius:10,color:"white",background:"linear-gradient(135deg,#6366f1,#4f46e5)",border:"none",fontWeight:700,fontSize:13,cursor:"pointer",opacity:chatLoad||!chatInput.trim()?0.4:1}}>Send</button>
               </div>
-              <div style={{textAlign:"center",marginTop:6,fontSize:8,color:"#b0b8c4"}}>Rules-based synthesis · Not predictive AI</div>
+              <div style={{textAlign:"center",marginTop:6,fontSize:10,color:"#b0b8c4"}}>Rules-based synthesis · Not predictive AI</div>
             </div>
           </div>
         </>
@@ -1708,11 +1708,11 @@ function App(){
 
       <FacultyModal researcher={selectedFaculty} onClose={()=>setSelectedFaculty(null)}/>
 
-      <footer style={{marginTop:8,borderTop:"1px solid #eef2f7",padding:"8px 20px",textAlign:"center",fontSize:9,color:"#94a3b8",lineHeight:1.4}}>
+      <footer style={{marginTop:8,borderTop:"1px solid #eef2f7",padding:"8px 20px",textAlign:"center",fontSize:11,color:"#94a3b8",lineHeight:1.4}}>
         <div>Gies College of Business · Impact Command Center · <strong>2,022</strong> publications · <strong>426</strong> sustainable papers</div>
-        <div style={{marginTop:2,fontSize:9,color:"#b0b8c4"}}>
+        <div style={{marginTop:2,fontSize:11,color:"#b0b8c4"}}>
           Data: Illinois Experts via Elsevier Scopus · Global benchmark: UN SDG 2023 (normalized) · All insights are rules-based synthesis labeled "AI-assisted" — not predictions ·
-          <button onClick={()=>setShowSources(true)} style={{background:"none",border:"none",color:"#6366f1",cursor:"pointer",fontSize:9,marginLeft:2}}>Methodology</button>
+          <button onClick={()=>setShowSources(true)} style={{background:"none",border:"none",color:"#6366f1",cursor:"pointer",fontSize:11,marginLeft:2}}>Methodology</button>
         </div>
       </footer>
     </div>
