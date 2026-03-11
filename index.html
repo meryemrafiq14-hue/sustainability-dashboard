@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,12 +50,50 @@ a{text-decoration:none}
 .ai-drawer-backdrop{position:fixed;inset:0;z-index:950;background:rgba(15,23,42,.18);backdrop-filter:blur(2px);transition:opacity .25s ease}
 .ai-drawer{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:92vw;z-index:960;background:white;box-shadow:-8px 0 40px rgba(0,0,0,.1);display:flex;flex-direction:column;animation:drawerSlideIn .3s ease forwards}
 .ai-drawer.closing{animation:drawerSlideOut .25s ease forwards}
+
+/* ── MOBILE RESPONSIVE ─────────────────────────────────────── */
+@media(max-width:768px){
+  .mobile-hide{display:none!important}
+  .mobile-stack{flex-direction:column!important}
+  .mobile-grid-1{grid-template-columns:1fr!important}
+  .mobile-grid-2{grid-template-columns:1fr 1fr!important}
+  .mobile-full{width:100%!important;max-width:100%!important}
+  .mobile-pad{padding:10px 12px!important}
+  .mobile-text-sm{font-size:10px!important}
+  .mobile-wrap{flex-wrap:wrap!important}
+  .ai-fab{bottom:16px;right:16px;padding:10px 16px;font-size:12px}
+  .ai-drawer{width:100vw;max-width:100vw;top:auto;height:85vh;border-radius:16px 16px 0 0;animation:mobileDrawerSlideIn .3s ease forwards}
+  @keyframes mobileDrawerSlideIn{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .tab-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tab-scroll::-webkit-scrollbar{display:none}
+  .hero-title{font-size:20px!important}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)!important}
+  .overview-3col{grid-template-columns:1fr!important}
+  .network-grid{grid-template-columns:1fr!important}
+  .global-grid{grid-template-columns:1fr!important}
+  .collab-grid{grid-template-columns:1fr!important}
+  .researcher-grid{grid-template-columns:1fr 1fr!important}
+  .journey-steps{gap:2px!important}
+  .journey-step-label{font-size:7px!important}
+  .persona-header-grid{grid-template-columns:1fr!important;display:none!important}
+  .sources-strip{display:none!important}
+}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel" data-presets="react">
 const{useState,useMemo,useEffect,useCallback,useRef}=React;
+
+function useIsMobile(){
+  const[isMobile,setIsMobile]=useState(()=>window.innerWidth<=768);
+  useEffect(()=>{
+    const handler=()=>setIsMobile(window.innerWidth<=768);
+    window.addEventListener("resize",handler);
+    return()=>window.removeEventListener("resize",handler);
+  },[]);
+  return isMobile;
+}
 
 // ── INSTITUTIONAL DATA ────────────────────────────────────────
 const YEAR_DATA=[
@@ -717,6 +754,7 @@ function DataSourcesModal({onClose}){
 
 // ── MAIN APP ──────────────────────────────────────────────────
 function App(){
+  const isMobile=useIsMobile();
   const [tab,setTab]=useState("overview");
   const [selSDGs,setSelSDGs]=useState([]);
   const [selYear,setSelYear]=useState("All");
@@ -807,43 +845,49 @@ function App(){
 
       {/* ── HEADER ── */}
       <header style={{background:"#0a1628",position:"sticky",top:0,zIndex:50,boxShadow:"0 1px 8px rgba(0,0,0,.2)"}}>
-        <div style={{maxWidth:1400,margin:"0 auto",padding:"0 20px",height:46,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
-          <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0}}>
-            <div style={{width:32,height:32,borderRadius:8,background:"#e85d26",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"white",fontSize:15}}>G</div>
-            <div>
+        <div style={{maxWidth:1400,margin:"0 auto",padding:"0 12px",height:isMobile?42:46,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+          <div style={{display:"flex",alignItems:"center",gap:7,flexShrink:0}}>
+            <div style={{width:28,height:28,borderRadius:7,background:"#e85d26",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"white",fontSize:13}}>G</div>
+            {!isMobile&&<div>
               <div style={{color:"white",fontWeight:700,fontSize:13,lineHeight:1}}>Gies College of Business</div>
               <div style={{color:"#64748b",fontSize:10,marginTop:1}}>Impact Command Center</div>
-            </div>
+            </div>}
+            {isMobile&&<div style={{color:"white",fontWeight:700,fontSize:12}}>Gies Impact</div>}
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:3,background:"rgba(255,255,255,.06)",padding:3,borderRadius:20,border:"1px solid rgba(255,255,255,.08)"}}>
+          {!isMobile&&<div style={{display:"flex",alignItems:"center",gap:3,background:"rgba(255,255,255,.06)",padding:3,borderRadius:20,border:"1px solid rgba(255,255,255,.08)"}}>
             <button onClick={()=>handlePersonaSwitch("donor")} style={{fontSize:10,fontWeight:600,padding:"5px 12px",borderRadius:16,border:"none",cursor:"pointer",background:personaView==="donor"?"#e85d26":"transparent",color:personaView==="donor"?"white":"#64748b",transition:"all .2s"}}>🎯 Donor View</button>
             <button onClick={()=>handlePersonaSwitch("student")} style={{fontSize:10,fontWeight:600,padding:"5px 12px",borderRadius:16,border:"none",cursor:"pointer",background:personaView==="student"?"#6366f1":"transparent",color:personaView==="student"?"white":"#64748b",transition:"all .2s"}}>🎓 Student View</button>
-          </div>
-          <nav style={{display:"flex",gap:2,background:"rgba(255,255,255,.06)",padding:3,borderRadius:10}}>
+          </div>}
+          <nav className="tab-scroll" style={{display:"flex",gap:2,background:"rgba(255,255,255,.06)",padding:3,borderRadius:10,overflowX:isMobile?"auto":"visible",flexShrink:isMobile?1:0}}>
             {TABS.map(t=>(
-              <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"6px 13px",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:tab===t.id?"#e85d26":"transparent",color:tab===t.id?"white":"#94a3b8",transition:"all .2s"}}>{t.label}</button>
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:isMobile?"5px 9px":"6px 13px",borderRadius:7,border:"none",cursor:"pointer",fontSize:isMobile?10:11,fontWeight:600,background:tab===t.id?"#e85d26":"transparent",color:tab===t.id?"white":"#94a3b8",transition:"all .2s",whiteSpace:"nowrap",flexShrink:0}}>{isMobile?t.label.split(" ")[0]:t.label}</button>
             ))}
           </nav>
-          <div style={{display:"flex",alignItems:"center",gap:7,flexShrink:0}}>
-            <div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,.06)",padding:"4px 10px",borderRadius:20}}>
+          <div style={{display:"flex",alignItems:"center",gap:5,flexShrink:0}}>
+            {!isMobile&&<div style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,.06)",padding:"4px 10px",borderRadius:20}}>
               <div className="pulse-dot" style={{width:5,height:5,borderRadius:"50%",background:"#4ade80"}}/>
               <span style={{color:"#4ade80",fontSize:10,fontWeight:600}}>Live Data</span>
-            </div>
+            </div>}
             <button onClick={()=>setShowSources(true)} title="Data Sources" style={{width:27,height:27,borderRadius:"50%",border:"1px solid rgba(255,255,255,.12)",background:"rgba(255,255,255,.05)",color:"#94a3b8",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>i</button>
           </div>
         </div>
+        {/* Mobile persona toggle row */}
+        {isMobile&&<div style={{display:"flex",gap:2,padding:"3px 12px 5px",background:"rgba(255,255,255,.03)",borderTop:"1px solid rgba(255,255,255,.06)"}}>
+          <button onClick={()=>handlePersonaSwitch("donor")} style={{flex:1,fontSize:9,fontWeight:600,padding:"4px 8px",borderRadius:12,border:"none",cursor:"pointer",background:personaView==="donor"?"#e85d26":"transparent",color:personaView==="donor"?"white":"#64748b"}}>🎯 Donor View</button>
+          <button onClick={()=>handlePersonaSwitch("student")} style={{flex:1,fontSize:9,fontWeight:600,padding:"4px 8px",borderRadius:12,border:"none",cursor:"pointer",background:personaView==="student"?"#6366f1":"transparent",color:personaView==="student"?"white":"#64748b"}}>🎓 Student View</button>
+        </div>}
       </header>
 
-      <main style={{maxWidth:1400,margin:"0 auto",padding:"8px 20px 12px",display:"flex",flexDirection:"column",gap:8}} className="view-transition" key={personaView+tab}>
+      <main style={{maxWidth:1400,margin:"0 auto",padding:isMobile?"6px 10px 80px":"8px 20px 12px",display:"flex",flexDirection:"column",gap:8}} className="view-transition" key={personaView+tab}>
 
         {/* ═══════════ OVERVIEW ═══════════ */}
         {tab==="overview"&&(
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            <div className="fadein" style={{background:"#f5f5f4",borderRadius:10,padding:"22px 32px 20px",marginBottom:2}}>
+            <div className="fadein" style={{background:"#f5f5f4",borderRadius:10,padding:isMobile?"14px 16px 14px":"22px 32px 20px",marginBottom:2}}>
               <div style={{display:"inline-block",background:"rgba(232,93,38,0.12)",borderRadius:20,padding:"4px 14px",marginBottom:10}}>
                 <span style={{fontSize:10,fontWeight:700,color:"#e85d26",letterSpacing:"0.08em",textTransform:"uppercase"}}>Sustainability at Gies</span>
               </div>
-              <div style={{fontSize:28,fontWeight:900,color:"#13294B",lineHeight:1.15,marginBottom:10}}>
+              <div style={{fontSize:isMobile?20:28,fontWeight:900,color:"#13294B",lineHeight:1.15,marginBottom:10}}>
                 Moving from Information to <span style={{color:"#e85d26"}}>Action.</span>
               </div>
               <div style={{fontSize:13,color:"#4a5568",lineHeight:1.6,maxWidth:520}}>
@@ -902,7 +946,7 @@ function App(){
                 </div>
               </div>
             )}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6}}>
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(5,1fr)",gap:6}}>
               {[
                 {label:personaView==="donor"?"Research Output":"Total Publications",val:"2,022",sub:"Indexed Gies papers",color:"#0a1628"},
                 {label:personaView==="donor"?"Impact Papers":"Sustainable Papers",val:selSDGs.length>0?activePapers:"426",sub:selSDGs.length>0?"Selected SDGs":"Meeting SDG criteria",color:"#3F7E44"},
@@ -912,12 +956,12 @@ function App(){
               ].map(k=>(
                 <div key={k.label} style={{...S.card,padding:"8px 11px"}} className="fadein">
                   <div style={S.label}>{k.label}</div>
-                  <div style={{fontSize:24,fontWeight:900,color:k.color,margin:"2px 0 1px",letterSpacing:"-.5px"}}>{k.val}</div>
+                  <div style={{fontSize:isMobile?20:24,fontWeight:900,color:k.color,margin:"2px 0 1px",letterSpacing:"-.5px"}}>{k.val}</div>
                   <div style={{fontSize:8,color:"#94a3b8"}}>{k.sub}</div>
                 </div>
               ))}
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 2fr 1fr",gap:6,alignItems:"start"}}>
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 2fr 1fr",gap:6,alignItems:"start"}}>
               <div style={{display:"flex",flexDirection:"column",gap:4}}>
                 {(()=>{
                   const topSDG=OVER_INDEXED[0];
@@ -1218,7 +1262,7 @@ function App(){
                 </div>
               </div>
             )}
-            <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:10}}>
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:10}}>
               <div style={S.card}>
                 <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:1}}>Collaboration Network</div>
                 <p style={{fontSize:9,color:"#94a3b8",marginBottom:8}}>Click a department to see suggested pairings</p>
@@ -1272,7 +1316,7 @@ function App(){
             </div>
             <div style={S.card}>
               <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:7}}>All Sustainability Researchers</div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>
+              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:6}}>
                 {RESEARCHERS.map(r=>(
                   <div key={r.name} onClick={()=>setSelectedFaculty(r)} style={{padding:8,background:"#f8fafc",borderRadius:7,border:"1px solid #f1f5f9",cursor:"pointer",transition:"background .15s"}}
                     onMouseEnter={e=>e.currentTarget.style.background="#eef2f7"}
@@ -1294,7 +1338,7 @@ function App(){
         {/* ═══════════ GLOBAL IMPACT ═══════════ */}
         {tab==="globalimpact"&&(
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            <div style={{display:"grid",gridTemplateColumns:"3fr 2fr",gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"3fr 2fr",gap:8}}>
               <div style={S.card}>
                 <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:7}}>Geospatial Research Reach</div>
                 <WorldMap/>
@@ -1332,7 +1376,7 @@ function App(){
                 </div>
               </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:10}}>
               <div style={S.card}>
                 <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6}}>
                   <div style={{fontWeight:700,color:"#334155",fontSize:11}}>Gap Index Ranking</div>
@@ -1366,7 +1410,7 @@ function App(){
             </div>
             <div style={S.card}>
               <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:7}}>All 17 SDGs at Gies</div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:5}}>
+              <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(3,1fr)":"repeat(6,1fr)",gap:5}}>
                 {Object.entries(SDG_META).map(([id,s])=>{
                   const gies=SDG_COUNTS[Number(id)]||0;
                   const gap=GAP_INDEX[Number(id)];
@@ -1460,7 +1504,7 @@ function App(){
             </div>
 
             {/* Context cards */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:8}}>
               {[
                 {icon:"🎯",title:"Sponsor a Priority",body:"Match your funding to Gies' most under-indexed SDGs. SDG 14, 15, and 2 are the highest-priority open tracks.",color:"#e85d26",bg:"#fff7ed",border:"#fed7aa"},
                 {icon:"🤝",title:"Research Partnerships",body:"Connect directly with faculty working on SDG-aligned research. Use the Network tab to identify collaboration fits.",color:"#0A97D9",bg:"#eff6ff",border:"#bfdbfe"},
@@ -1530,7 +1574,7 @@ function App(){
                     <div style={{fontWeight:900,color:"white",fontSize:14}}>{p.name}, {p.age} — <span style={{fontWeight:500,opacity:.8}}>{p.role}</span></div>
                     <div style={{fontSize:10,color:"rgba(255,255,255,.65)",marginTop:2,fontStyle:"italic"}}>"{p.quote}"</div>
                   </div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,flexShrink:0}}>
+                  <div style={{display:isMobile?"none":"grid",gridTemplateColumns:"1fr 1fr",gap:6,flexShrink:0}}>
                     <div style={{background:"rgba(255,255,255,.1)",borderRadius:7,padding:"5px 9px",textAlign:"center"}}>
                       <div style={{fontSize:8,color:"rgba(255,255,255,.5)",marginBottom:1}}>GOAL</div>
                       <div style={{fontSize:9,color:"white",fontWeight:600,lineHeight:1.3}}>{p.goal}</div>
@@ -1541,9 +1585,9 @@ function App(){
                     </div>
                   </div>
                 </div>
-                <div style={{padding:"14px 18px",display:"flex",flexDirection:"column",gap:12}}>
+                <div style={{padding:isMobile?"10px 12px":"14px 18px",display:"flex",flexDirection:"column",gap:12}}>
                   {/* Status quo vs. with dashboard */}
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                  <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:8}}>
                     <div style={{background:"#fff1f2",borderRadius:8,padding:"8px 12px",border:"1px solid #fecaca"}}>
                       <div style={{fontSize:8,fontWeight:700,color:"#be123c",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>❌ Status Quo (Before)</div>
                       <div style={{fontSize:9,color:"#7f1d1d",lineHeight:1.6}}>{p.statusQuo}</div>
