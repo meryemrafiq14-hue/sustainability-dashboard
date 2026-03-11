@@ -24,6 +24,13 @@ Under the hood, it runs a two-stage AI classification pipeline: LLMs handle rele
 
 ## Features
 
+### Hero Banner
+A full-width landing section at the top of the Overview tab, visible immediately on load.
+
+- **"Sustainability at Gies"** pill label in Illinois orange
+- **"Moving from Information to Action."** headline in navy and orange
+- Subtitle communicating the dashboard's core purpose: bridging data-driven insights with actionable solutions
+
 ### Analytics & Visualization
 - **SDG Distribution:** Research alignment across all 17 UN Sustainable Development Goals
 - **Department Comparisons:** Sustainability contribution analysis broken down by academic department
@@ -60,7 +67,7 @@ The dashboard has five tabs:
 
 | Tab | What it does |
 |---|---|
-| Overview | SDG wheel, gap index, department breakdown, AI snapshot |
+| Overview | Hero banner, SDG wheel, gap index, department breakdown, AI snapshot |
 | Network | Collaboration pairings and researcher profiles |
 | Global Impact | World map, geospatial research reach, full SDG coverage |
 | **Collaboration Hub** | **Embedded Case Competition portal, sponsorship tracks, partner links** |
@@ -144,6 +151,7 @@ No dependencies, no build process, no npm install.
 
 - [x] Collaboration Hub with embedded Case Competition portal
 - [x] SDG gap-to-sponsorship mapping
+- [x] Hero banner on Overview tab ("Moving from Information to Action.")
 - [ ] Faculty-level profiles with individual SDG breakdowns
 - [ ] Confidence score display per publication classification
 - [ ] Semantic search with natural language query support
