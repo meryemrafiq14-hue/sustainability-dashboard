@@ -388,13 +388,7 @@ The app generates explanations based on actual scores:
 
 ---
 
-## Related Documentation
-
-- **`methodology.md`** - Complete step-by-step methodology
-- **`limitations.md`** - Known limitations and future work
-- **`QUICK_START_FOR_JUDGES.md`** - Quick overview for judges
-
-**Note**: All judge Q&A related to the Collaboration Hub is covered in this document (see "Frequently Asked Questions" section above).
+**Note**: This document is the complete technical documentation for the Collaboration Hub. All methodology, limitations, judge Q&A, and technical details are consolidated here.
 
 ---
 
@@ -536,7 +530,7 @@ We found that 45/40/15 best balances research quality (topic + method) with stra
 4. **NLP Model**: Uses general-purpose model, not domain-specific
 5. **Network Effects**: Existing collaborations not yet considered
 
-**See `limitations.md` for detailed discussion of limitations and future improvements.**
+**See the "Limitations & Future Work" section above for detailed discussion.**
 
 ---
 
