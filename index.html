@@ -34,13 +34,8 @@ a{text-decoration:none}
 .tooltip-trigger{position:relative;cursor:help}
 .tooltip-trigger .tooltip-content{display:none;position:absolute;z-index:100;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0a1628;color:white;padding:10px 14px;border-radius:8px;font-size:11px;line-height:1.5;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .tooltip-trigger:hover .tooltip-content{display:block}
-.map-country{transition:fill .18s ease}
-.map-country:hover{fill:#D1D5DB}
-.map-bubble{transition:all .22s ease;cursor:pointer}
-.map-bubble:hover .bubble-outer{opacity:.18}
-.map-bubble:hover .bubble-inner{filter:url(#mapGlow)}
-.map-tooltip{pointer-events:none;opacity:0;transition:opacity .15s ease}
-.map-bubble:hover .map-tooltip{opacity:1}
+.map-country{fill:#DBEAFE}
+
 @keyframes drawerSlideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
 @keyframes drawerSlideOut{from{transform:translateX(0)}to{transform:translateX(100%)}}
 @keyframes fabPulse{0%,100%{box-shadow:0 4px 20px rgba(99,102,241,.25)}50%{box-shadow:0 4px 28px rgba(99,102,241,.45)}}
@@ -192,13 +187,7 @@ const KEYWORDS=[
   {word:"China",count:14,sdgs:[16,9]},
   {word:"Natural Disasters",count:13,sdgs:[13,11]}
 ];
-const COUNTRY_DATA={
-  USA:{lat:37,lng:-95.7,count:80},China:{lat:35.8,lng:104,count:103},
-  India:{lat:20.6,lng:79,count:94},Brazil:{lat:-14,lng:-52,count:88},
-  Kenya:{lat:-.02,lng:38,count:79},UK:{lat:55.4,lng:-3,count:89},
-  Germany:{lat:51.2,lng:10,count:89},Japan:{lat:36.2,lng:138,count:80},
-  Mexico:{lat:23.6,lng:-103,count:98}
-};
+
 const COLLAB_PAIRS={
   "Business Administration":[
     {pair:"Lough, Benjamin + Rios, Kimberly",sdgs:"SDG 17+10",outcome:"International volunteering and inequality reduction — shared SDG 10 and 17 coverage across 70 combined papers",
@@ -370,12 +359,11 @@ function generateRecommendations(selectedSDG){
 function generateGlobalInsights(){
   const bigUnder=UNDER_INDEXED.slice(0,3);
   const bigOver=OVER_INDEXED.slice(0,2);
-  const topCountry=Object.entries(COUNTRY_DATA).sort((a,b)=>b[1].count-a[1].count)[0];
   return [
-    `Research reaches ${Object.keys(COUNTRY_DATA).length} countries; ${topCountry[0]} leads with ${topCountry[1].count} co-publication signals.`,
     `Largest gaps: ${bigUnder.map(g=>`SDG ${g.id} (${g.gap}pp)`).join(", ")} — priority areas for faculty recruitment.`,
     `Strongest alignment: ${bigOver.map(g=>`SDG ${g.id} (+${g.gap}pp)`).join(", ")} — exceeds global benchmarks.`,
-    `SDG 14 and 15 at zero coverage vs. ~5.7% global benchmark — most actionable strategic gaps.`
+    `SDG 14 and 15 at zero coverage vs. ~5.7% global benchmark — most actionable strategic gaps.`,
+    `Geographic co-authorship data is not available in this dataset. The Illinois Experts API (2010–2020) indexes publication metadata, not author location.`
   ];
 }
 
@@ -500,6 +488,119 @@ function FacultyModal({researcher:r, onClose}){
   );
 }
 
+function ResearcherNetwork({researchers, sdgMeta, onSelect}){
+  const [hoveredId, setHoveredId] = React.useState(null);
+  const W=580, H=300;
+  const DEPT_COLOR={"Business Admin":"#e85d26","Finance":"#0A97D9","Gies Affiliates":"#3F7E44","Accountancy":"#6366f1"};
+
+  // Fixed positions for 8 nodes in an organic layout
+  const positions=[
+    {x:100,y:100},{x:240,y:60},{x:380,y:80},{x:490,y:140},
+    {x:460,y:240},{x:320,y:260},{x:180,y:250},{x:80,y:200}
+  ];
+
+  const nodes = researchers.map((r,i)=>({
+    ...r, id:i,
+    x:positions[i].x, y:positions[i].y,
+    r: Math.sqrt(r.count)*2.8+10,
+    color: sdgMeta[r.topSdg]?.color||"#64748b",
+    deptColor: DEPT_COLOR[r.dept]||"#64748b",
+    label: r.name.split(",")[0], // last name only
+  }));
+
+  // Build edges: connect nodes that share an SDG
+  const edges=[];
+  for(let i=0;i<nodes.length;i++){
+    for(let j=i+1;j<nodes.length;j++){
+      const shared=nodes[i].sdgs.filter(s=>nodes[j].sdgs.includes(s));
+      if(shared.length>0){
+        edges.push({a:i,b:j,sdgs:shared});
+      }
+    }
+  }
+
+  const activeEdges = hoveredId!==null
+    ? edges.filter(e=>e.a===hoveredId||e.b===hoveredId)
+    : [];
+  const connectedIds = new Set(activeEdges.flatMap(e=>[e.a,e.b]));
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:300,display:"block"}}>
+      {/* All edges (dimmed when a node is hovered) */}
+      {edges.map((e,i)=>{
+        const a=nodes[e.a], b=nodes[e.b];
+        const isActive=activeEdges.includes(e);
+        const isDimmed=hoveredId!==null&&!isActive;
+        return (
+          <line key={i}
+            x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+            stroke={isActive?sdgMeta[e.sdgs[0]]?.color||"#e85d26":"#e2e8f0"}
+            strokeWidth={isActive?2.5:1.5}
+            opacity={isDimmed?0.1:isActive?0.9:0.5}
+            style={{transition:"all .25s"}}
+          />
+        );
+      })}
+      {/* Edge SDG labels on active connections */}
+      {activeEdges.map((e,i)=>{
+        const a=nodes[e.a], b=nodes[e.b];
+        const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+        return (
+          <g key={"lbl"+i}>
+            <rect x={mx-18} y={my-8} width={36} height={14} rx={7} fill={sdgMeta[e.sdgs[0]]?.color||"#e85d26"} opacity={0.9}/>
+            <text x={mx} y={my+1} textAnchor="middle" dominantBaseline="middle" fontSize="8" fill="white" fontWeight="700">
+              SDG {e.sdgs.join("+")}
+            </text>
+          </g>
+        );
+      })}
+      {/* Nodes */}
+      {nodes.map(n=>{
+        const isDimmed=hoveredId!==null&&!connectedIds.has(n.id)&&hoveredId!==n.id;
+        const isHovered=hoveredId===n.id;
+        return (
+          <g key={n.id}
+            onClick={()=>onSelect(researchers[n.id])}
+            onMouseEnter={()=>setHoveredId(n.id)}
+            onMouseLeave={()=>setHoveredId(null)}
+            style={{cursor:"pointer"}}
+          >
+            {/* Dept ring */}
+            <circle cx={n.x} cy={n.y} r={n.r+4}
+              fill="none" stroke={n.deptColor} strokeWidth={isHovered?2.5:1.5}
+              opacity={isDimmed?0.15:isHovered?1:0.5}
+              style={{transition:"all .25s"}}
+            />
+            {/* Main node colored by top SDG */}
+            <circle cx={n.x} cy={n.y} r={n.r}
+              fill={n.color} stroke="white" strokeWidth={2}
+              opacity={isDimmed?0.2:1}
+              style={{transition:"all .25s",filter:isHovered?"drop-shadow(0 2px 8px rgba(0,0,0,0.25))":"none"}}
+            />
+            {/* Paper count */}
+            <text x={n.x} y={n.y+1} textAnchor="middle" dominantBaseline="middle"
+              fontSize={n.r>22?"12":"10"} fill="white" fontWeight="900"
+              opacity={isDimmed?0.2:1} style={{transition:"opacity .25s", pointerEvents:"none"}}
+            >{n.count}</text>
+            {/* Name label */}
+            <text x={n.x} y={n.y+n.r+12} textAnchor="middle"
+              fontSize="9" fill={isHovered?"#0f172a":"#64748b"} fontWeight={isHovered?"700":"500"}
+              opacity={isDimmed?0.2:1} style={{transition:"all .25s", pointerEvents:"none"}}
+            >{n.label}</text>
+            {/* SDG badge on hover */}
+            {isHovered&&(
+              <g>
+                <rect x={n.x-20} y={n.y-n.r-18} width={40} height={14} rx={7} fill={n.color}/>
+                <text x={n.x} y={n.y-n.r-11} textAnchor="middle" dominantBaseline="middle" fontSize="8" fill="white" fontWeight="700">SDG {n.topSdg}</text>
+              </g>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 function ShimmerBlock({lines=3}){
   return (
     <div style={{padding:2}}>
@@ -577,11 +678,10 @@ function SDGWheel({selected,onToggle,showGlobal}){
 }
 
 function WorldMap(){
-  const containerRef=React.useRef(null);
   const svgRef=React.useRef(null);
   const [ready,setReady]=React.useState(false);
   const [error,setError]=React.useState(false);
-  const W=960,H=500;
+  const W=960,H=440;
 
   React.useEffect(()=>{
     let cancelled=false;
@@ -601,45 +701,27 @@ function WorldMap(){
   function renderMap(countries,borders){
     const svg=d3.select(svgRef.current);
     svg.selectAll("*").remove();
-    const projection=d3.geoNaturalEarth1()
-      .fitSize([W-40,H-40],countries)
-      .translate([W/2,H/2]);
+    const projection=d3.geoNaturalEarth1().fitSize([W-40,H-40],countries).translate([W/2,H/2]);
     const path=d3.geoPath(projection);
-    const defs=svg.append("defs");
-    const filt=defs.append("filter").attr("id","mapGlow");
-    filt.append("feGaussianBlur").attr("in","SourceGraphic").attr("stdDeviation","3").attr("result","blur");
-    const merge=filt.append("feMerge");
-    merge.append("feMergeNode").attr("in","blur");
-    merge.append("feMergeNode").attr("in","SourceGraphic");
-    svg.append("path").datum({type:"Sphere"}).attr("d",path).attr("fill","#FAFBFC").attr("stroke","#E2E8F0").attr("stroke-width",0.8);
-    svg.append("g").selectAll("path").data(countries.features).join("path").attr("d",path).attr("fill","#E5E7EB").attr("class","map-country");
-    svg.append("path").datum(borders).attr("d",path).attr("fill","none").attr("stroke","#D1D5DB").attr("stroke-width",0.5).attr("stroke-linejoin","round");
-    const max=Math.max(...Object.values(COUNTRY_DATA).map(d=>d.count));
-    const entries=Object.entries(COUNTRY_DATA).sort((a,b)=>a[1].count-b[1].count);
-    const bubbleG=svg.append("g").attr("class","map-bubbles");
-    entries.forEach(([name,{lat,lng,count}])=>{
-      const [cx,cy]=projection([lng,lat]);
-      if(cx==null||cy==null)return;
-      const r=6+(count/max)*14;
-      const g=bubbleG.append("g").attr("class","map-bubble");
-      g.append("circle").attr("class","bubble-outer").attr("cx",cx).attr("cy",cy).attr("r",r*2).attr("fill","#e85d26").attr("opacity",0.06);
-      g.append("circle").attr("class","bubble-inner").attr("cx",cx).attr("cy",cy).attr("r",r).attr("fill","#e85d26").attr("stroke","#fff").attr("stroke-width",1.5);
-      g.append("text").attr("x",cx).attr("y",cy+0.5).attr("text-anchor","middle").attr("dominant-baseline","central").attr("fill","#fff").attr("font-size",r>13?11:9).attr("font-weight",700).attr("font-family","system-ui,-apple-system,sans-serif").attr("pointer-events","none").text(count);
-      const tip=g.append("g").attr("class","map-tooltip");
-      const label=`${name}  ·  ${count} papers`;
-      const tw=label.length*6.2+22;
-      const tx=cx+r+8,ty=cy;
-      const flipLeft=tx+tw>W-10;
-      const finalX=flipLeft?cx-r-8-tw:tx;
-      tip.append("rect").attr("x",finalX).attr("y",ty-14).attr("width",tw).attr("height",28).attr("rx",6).attr("fill","#0F172A").attr("opacity",0.92);
-      tip.append("text").attr("x",finalX+11).attr("y",ty+1).attr("fill","#fff").attr("font-size",11).attr("font-weight",600).attr("font-family","system-ui,-apple-system,sans-serif").attr("dominant-baseline","central").text(label);
-    });
+    svg.append("path").datum({type:"Sphere"}).attr("d",path).attr("fill","#EFF6FF").attr("stroke","#BFDBFE").attr("stroke-width",0.8);
+    svg.append("g").selectAll("path").data(countries.features).join("path").attr("d",path).attr("fill","#DBEAFE").attr("stroke","#93C5FD").attr("stroke-width",0.4);
+    svg.append("path").datum(borders).attr("d",path).attr("fill","none").attr("stroke","#BFDBFE").attr("stroke-width",0.4);
+    // Label: Gies is based in Illinois, USA — pin it
+    const [ux,uy]=projection([-88.2,40.1]);
+    if(ux&&uy){
+      svg.append("circle").attr("cx",ux).attr("cy",uy).attr("r",8).attr("fill","#e85d26").attr("stroke","white").attr("stroke-width",2).attr("opacity",0.9);
+      svg.append("circle").attr("cx",ux).attr("cy",uy).attr("r",18).attr("fill","#e85d26").attr("opacity",0.12);
+      svg.append("text").attr("x",ux+14).attr("y",uy+1).attr("fill","#0a1628").attr("font-size",11).attr("font-weight",700).attr("font-family","system-ui,sans-serif").attr("dominant-baseline","central").text("Gies College of Business · UIUC");
+    }
   }
 
   return (
-    <div ref={containerRef} style={{borderRadius:10,overflow:"hidden",background:"#FAFBFC",border:"1px solid #E5E7EB"}}>
-      {error?(<div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:14}}>Unable to load map data.</div>):!ready?(<div style={{height:280,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:14,gap:8}}><svg width="16" height="16" viewBox="0 0 16 16" style={{animation:"sdg-spin 1s linear infinite"}}><circle cx="8" cy="8" r="6" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="28" strokeDashoffset="8"/></svg>Loading map…</div>):null}
+    <div style={{borderRadius:10,overflow:"hidden",background:"#EFF6FF",border:"1px solid #BFDBFE",position:"relative"}}>
+      {error?(<div style={{height:260,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:14}}>Unable to load map.</div>):!ready?(<div style={{height:260,display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",fontSize:14,gap:8}}><svg width="16" height="16" viewBox="0 0 16 16" style={{animation:"sdg-spin 1s linear infinite"}}><circle cx="8" cy="8" r="6" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="28" strokeDashoffset="8"/></svg>Loading map…</div>):null}
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{display:ready?"block":"none",width:"100%"}} preserveAspectRatio="xMidYMid meet"/>
+      <div style={{position:"absolute",bottom:8,left:10,fontSize:8,color:"#64748b",background:"rgba(255,255,255,0.85)",borderRadius:5,padding:"3px 8px",border:"1px solid #e2e8f0"}}>
+        The Illinois Experts dataset (2010–2020) does not include geographic co-authorship data. Country-level breakdowns are not available.
+      </div>
     </div>
   );
 }
@@ -752,6 +834,210 @@ function DataSourcesModal({onClose}){
   );
 }
 
+// ── NETWORK TAB COMPONENT ─────────────────────────────────────
+function NetworkTab({setSelectedFaculty}){
+  const {useState:S2}=React;
+  const [netSearch,setNetSearch]=S2("");
+  const [netSDG,setNetSDG]=S2(null);
+  const [netDeptFilter,setNetDeptFilter]=S2(null);
+  const [pairA,setPairA]=S2(null);
+  const [pairB,setPairB]=S2(null);
+  const [contactTarget,setContactTarget]=S2(null);
+  const [contactMsg,setContactMsg]=S2("");
+  const [contactSent,setContactSent]=S2(false);
+  const deptColors={"Business Admin":"#e85d26","Finance":"#0A97D9","Gies Affiliates":"#3F7E44","Accountancy":"#6366f1"};
+  const depts=[...new Set(RESEARCHERS.map(r=>r.dept))];
+  const filtered=RESEARCHERS.filter(r=>{
+    const matchSearch=r.name.toLowerCase().includes(netSearch.toLowerCase())||r.dept.toLowerCase().includes(netSearch.toLowerCase());
+    const matchSDG=!netSDG||r.sdgs.includes(netSDG);
+    const matchDept=!netDeptFilter||r.dept===netDeptFilter;
+    return matchSearch&&matchSDG&&matchDept;
+  });
+  const sharedSDGs=pairA&&pairB?pairA.sdgs.filter(s=>pairB.sdgs.includes(s)):[];
+  const combinedSDGs=pairA&&pairB?[...new Set([...pairA.sdgs,...pairB.sdgs])]:[];
+  return (
+  <div style={{display:"flex",flexDirection:"column",gap:10}} className="view-transition">
+    <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
+      <div>
+        <div style={{fontWeight:900,fontSize:17,color:"#0f172a",letterSpacing:"-.3px"}}>Researcher Directory</div>
+        <div style={{fontSize:11,color:"#64748b",marginTop:2}}>Browse faculty by SDG, department, or name. Select any two researchers to see what they have in common.</div>
+      </div>
+      <div style={{fontSize:9,color:"#94a3b8",background:"#f8fafc",borderRadius:7,padding:"5px 10px",border:"1px solid #eef2f7",lineHeight:1.6}}>
+        <strong style={{color:"#64748b"}}>Data:</strong> Illinois Experts API · Elsevier Scopus · 2010–2020
+      </div>
+    </div>
+    <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+      <input value={netSearch} onChange={e=>setNetSearch(e.target.value)} placeholder="Search by name or department..." style={{flex:1,minWidth:180,fontSize:11,padding:"7px 12px",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",background:"white",color:"#334155"}}/>
+      <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+        {depts.map(d=>(
+          <button key={d} onClick={()=>setNetDeptFilter(netDeptFilter===d?null:d)} style={{fontSize:9,padding:"5px 10px",borderRadius:20,border:`1px solid ${deptColors[d]}`,background:netDeptFilter===d?deptColors[d]:"white",color:netDeptFilter===d?"white":deptColors[d],fontWeight:700,cursor:"pointer",transition:"all .15s"}}>{d}</button>
+        ))}
+      </div>
+    </div>
+    <div style={{display:"flex",gap:4,flexWrap:"wrap",alignItems:"center"}}>
+      <span style={{fontSize:9,color:"#94a3b8",fontWeight:600,marginRight:2}}>Filter by SDG:</span>
+      {Object.entries(SDG_META).filter(([id])=>RESEARCHERS.some(r=>r.sdgs.includes(Number(id)))).map(([id,m])=>(
+        <button key={id} onClick={()=>setNetSDG(netSDG===Number(id)?null:Number(id))} style={{fontSize:8,padding:"3px 8px",borderRadius:20,border:`1px solid ${m.color}`,background:netSDG===Number(id)?m.color:"white",color:netSDG===Number(id)?"white":m.color,fontWeight:700,cursor:"pointer",transition:"all .15s"}}>SDG {id}</button>
+      ))}
+      {(netSDG||netDeptFilter||netSearch)&&(
+        <button onClick={()=>{setNetSDG(null);setNetDeptFilter(null);setNetSearch("");}} style={{fontSize:9,padding:"3px 10px",borderRadius:20,border:"1px solid #e2e8f0",background:"#f1f5f9",color:"#64748b",cursor:"pointer",fontWeight:600}}>Clear filters ×</button>
+      )}
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:10,alignItems:"start"}}>
+      <div style={{display:"flex",flexDirection:"column",gap:6}}>
+        {filtered.length===0&&(<div style={{padding:20,textAlign:"center",color:"#94a3b8",fontSize:12,background:"white",borderRadius:10,border:"1px solid #f1f5f9"}}>No researchers match your filters.</div>)}
+        {filtered.map(r=>{
+          const dc=deptColors[r.dept]||"#64748b";
+          const initials=r.name.split(",").map(p=>p.trim()[0]).join("").slice(0,2);
+          const isPairA=pairA?.name===r.name;
+          const isPairB=pairB?.name===r.name;
+          const inPair=isPairA||isPairB;
+          return (
+            <div key={r.name} style={{background:"white",borderRadius:10,border:`1px solid ${inPair?dc:"#f1f5f9"}`,padding:"12px 14px",boxShadow:inPair?`0 0 0 2px ${dc}30`:"0 1px 4px rgba(0,0,0,.04)",transition:"all .15s"}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <div style={{width:40,height:40,borderRadius:"50%",background:`linear-gradient(135deg,${dc},${dc}bb)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:"white",flexShrink:0}}>{initials}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:13,fontWeight:800,color:"#0f172a"}}>{r.name}</div>
+                  <div style={{fontSize:10,color:dc,fontWeight:600,marginTop:1}}>{r.dept}</div>
+                </div>
+                <div style={{textAlign:"center",flexShrink:0}}>
+                  <div style={{fontSize:20,fontWeight:900,color:dc,lineHeight:1}}>{r.count}</div>
+                  <div style={{fontSize:8,color:"#94a3b8"}}>papers</div>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:4,marginTop:8,flexWrap:"wrap"}}>
+                {r.sdgs.map(s=>(<span key={s} style={{fontSize:9,padding:"3px 8px",borderRadius:20,background:SDG_META[s]?.color,color:"white",fontWeight:700}}>SDG {s}: {SDG_META[s]?.name}</span>))}
+              </div>
+              {r.keywords&&r.keywords.length>0&&(
+                <div style={{display:"flex",gap:3,marginTop:6,flexWrap:"wrap"}}>
+                  {r.keywords.slice(0,4).map(k=>(<span key={k} style={{fontSize:8,padding:"2px 6px",borderRadius:20,background:"#f8fafc",color:"#64748b",border:"1px solid #e2e8f0"}}>{k}</span>))}
+                </div>
+              )}
+              <div style={{display:"flex",gap:6,marginTop:10}}>
+                <button onClick={()=>setContactTarget(r)} style={{flex:1,fontSize:10,padding:"6px 0",borderRadius:7,background:dc,color:"white",border:"none",cursor:"pointer",fontWeight:700}} onMouseEnter={e=>e.currentTarget.style.opacity=".85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>✉ Contact</button>
+                <button onClick={()=>setSelectedFaculty(r)} style={{flex:1,fontSize:10,padding:"6px 0",borderRadius:7,background:"#f1f5f9",color:"#334155",border:"1px solid #e2e8f0",cursor:"pointer",fontWeight:600}}>View Profile</button>
+                <button onClick={()=>{if(isPairA)setPairA(null);else if(isPairB)setPairB(null);else if(!pairA)setPairA(r);else if(!pairB&&pairA.name!==r.name)setPairB(r);else{setPairA(r);setPairB(null);}}}
+                  style={{fontSize:10,padding:"6px 10px",borderRadius:7,background:inPair?dc+"18":"#f8fafc",color:inPair?dc:"#94a3b8",border:`1px solid ${inPair?dc:"#e2e8f0"}`,cursor:"pointer",fontWeight:700,flexShrink:0,transition:"all .15s"}}>
+                  {isPairA?"A ✓":isPairB?"B ✓":"Compare"}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8,position:"sticky",top:8}}>
+        <div style={{background:"white",borderRadius:10,border:"1px solid #e2e8f0",padding:"12px 14px"}}>
+          <div style={{fontWeight:800,fontSize:13,color:"#0f172a",marginBottom:4}}>Connection Explorer</div>
+          <div style={{fontSize:9,color:"#94a3b8",marginBottom:10,lineHeight:1.5}}>Select any two researchers to see what they have in common. Whether to connect is up to you — this just shows the overlap.</div>
+          {["A","B"].map(slot=>{
+            const r=slot==="A"?pairA:pairB;
+            const dc=r?deptColors[r.dept]||"#64748b":"#e2e8f0";
+            return (
+              <div key={slot} style={{marginBottom:6,padding:"8px 10px",borderRadius:8,border:`1px dashed ${r?dc:"#e2e8f0"}`,background:r?dc+"08":"#fafafa",minHeight:48,display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:24,height:24,borderRadius:"50%",background:r?dc:"#e2e8f0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:"white",flexShrink:0}}>{slot}</div>
+                {r?(<div style={{flex:1,minWidth:0}}><div style={{fontSize:11,fontWeight:700,color:"#334155",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</div><div style={{fontSize:9,color:dc}}>{r.dept} · {r.count} papers</div></div>):(<div style={{fontSize:10,color:"#94a3b8",fontStyle:"italic"}}>Click "Compare" on a researcher</div>)}
+                {r&&<button onClick={()=>slot==="A"?setPairA(null):setPairB(null)} style={{fontSize:11,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",padding:0,flexShrink:0}}>×</button>}
+              </div>
+            );
+          })}
+          {pairA&&pairB&&(
+            <div className="fadein" style={{marginTop:8,display:"flex",flexDirection:"column",gap:6}}>
+              <div style={{height:1,background:"#f1f5f9"}}/>
+              <div style={{fontSize:10,fontWeight:700,color:"#334155"}}>Shared SDG Coverage</div>
+              {sharedSDGs.length>0?(
+                <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{sharedSDGs.map(s=>(<span key={s} style={{fontSize:9,padding:"3px 8px",borderRadius:20,background:SDG_META[s]?.color,color:"white",fontWeight:700}}>SDG {s}: {SDG_META[s]?.name}</span>))}</div>
+              ):(
+                <div style={{fontSize:10,color:"#94a3b8",fontStyle:"italic",padding:"6px 8px",background:"#f8fafc",borderRadius:6}}>No directly shared SDGs — their work covers different but potentially complementary areas.</div>
+              )}
+              <div style={{fontSize:10,fontWeight:700,color:"#334155",marginTop:2}}>Combined SDG Reach</div>
+              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
+                {combinedSDGs.map(s=>(<span key={s} style={{fontSize:8,padding:"2px 6px",borderRadius:20,background:SDG_META[s]?.color+"18",color:SDG_META[s]?.color,fontWeight:700,border:`1px solid ${SDG_META[s]?.color}40`}}>SDG {s}</span>))}
+                <span style={{fontSize:8,color:"#94a3b8",alignSelf:"center"}}>{combinedSDGs.length} SDGs total</span>
+              </div>
+              <div style={{fontSize:9,color:"#64748b",padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #f1f5f9",lineHeight:1.5}}>
+                <strong>{pairA.count+pairB.count}</strong> combined papers · <strong>{pairA.dept===pairB.dept?"Same department":"Cross-department"}</strong>
+              </div>
+              <div style={{fontSize:8,color:"#94a3b8",fontStyle:"italic",lineHeight:1.5,padding:"5px 0"}}>This shows shared SDG coverage from the dataset only. It does not predict or recommend collaboration outcomes.</div>
+              <button onClick={()=>setContactTarget({name:`${pairA.name} & ${pairB.name}`,dept:"Collaboration enquiry",isPair:true,pairA,pairB})} style={{width:"100%",fontSize:10,padding:"7px 0",borderRadius:8,background:"#0a1628",color:"white",border:"none",cursor:"pointer",fontWeight:700,marginTop:2}}>✉ Reach Out to Both</button>
+            </div>
+          )}
+        </div>
+        <div style={{background:"white",borderRadius:10,border:"1px solid #f1f5f9",padding:"12px 14px"}}>
+          <div style={{fontWeight:700,fontSize:12,color:"#334155",marginBottom:8}}>Directory Stats</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5}}>
+            {[{label:"Researchers",val:RESEARCHERS.length},{label:"Showing",val:filtered.length},{label:"SDGs covered",val:[...new Set(RESEARCHERS.flatMap(r=>r.sdgs))].length},{label:"Departments",val:depts.length}].map(s=>(
+              <div key={s.label} style={{background:"#f8fafc",borderRadius:6,padding:"6px 8px",textAlign:"center"}}>
+                <div style={{fontSize:18,fontWeight:900,color:"#0a1628"}}>{s.val}</div>
+                <div style={{fontSize:8,color:"#94a3b8"}}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+    {contactTarget&&(
+      <div onClick={()=>{setContactTarget(null);setContactMsg("");setContactSent(false);}} style={{position:"fixed",inset:0,background:"rgba(10,22,40,0.55)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+        <div onClick={e=>e.stopPropagation()} className="fadein" style={{background:"white",borderRadius:14,width:"100%",maxWidth:460,boxShadow:"0 24px 60px rgba(0,0,0,.25)",overflow:"hidden"}}>
+          <div style={{background:"linear-gradient(135deg,#0a1628,#162544)",padding:"16px 20px",display:"flex",alignItems:"center",gap:10}}>
+            <div style={{flex:1}}><div style={{fontSize:14,fontWeight:900,color:"white"}}>Contact {contactTarget.isPair?"Researchers":"Researcher"}</div><div style={{fontSize:10,color:"#94a3b8",marginTop:2}}>{contactTarget.name}</div></div>
+            <button onClick={()=>{setContactTarget(null);setContactMsg("");setContactSent(false);}} style={{background:"rgba(255,255,255,0.1)",border:"none",borderRadius:"50%",width:28,height:28,cursor:"pointer",color:"white",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+          </div>
+          <div style={{padding:"18px 20px"}}>
+            {contactSent?(
+              <div className="fadein" style={{textAlign:"center",padding:"20px 0"}}>
+                <div style={{fontSize:32,marginBottom:10}}>✅</div>
+                <div style={{fontSize:14,fontWeight:800,color:"#0f172a",marginBottom:6}}>Message drafted!</div>
+                <div style={{fontSize:11,color:"#64748b",lineHeight:1.6,marginBottom:12}}>Copy the message below and send via your email client. Faculty contact details are available via the Illinois Experts directory.</div>
+                <div style={{padding:"10px 12px",background:"#f8fafc",borderRadius:8,border:"1px solid #e2e8f0",textAlign:"left",fontSize:10,color:"#334155",lineHeight:1.7}}>
+                  <strong>To:</strong> {contactTarget.isPair?`${contactTarget.pairA.name}, ${contactTarget.pairB.name}`:contactTarget.name}<br/>
+                  <strong>Subject:</strong> Research Collaboration Enquiry — Gies Sustainability Dashboard<br/><br/>
+                  {contactMsg||`Hi, I found your sustainability research profile on the Gies Impact Command Center and would love to connect about potential collaboration on ${contactTarget.isPair?[...new Set([...contactTarget.pairA.sdgs,...contactTarget.pairB.sdgs])].map(s=>`SDG ${s}`).join(", "):contactTarget.sdgs?.map(s=>`SDG ${s}`).join(", ")}.`}
+                </div>
+                <div style={{display:"flex",gap:8,marginTop:12,justifyContent:"center"}}>
+                  <a href="https://experts.illinois.edu/en/organisations/gies-college-of-business" target="_blank" style={{fontSize:10,padding:"7px 16px",borderRadius:8,background:"#6366f1",color:"white",textDecoration:"none",fontWeight:700}}>Find contact details →</a>
+                  <button onClick={()=>{setContactTarget(null);setContactMsg("");setContactSent(false);}} style={{fontSize:10,padding:"7px 16px",borderRadius:8,background:"#f1f5f9",color:"#64748b",border:"none",cursor:"pointer",fontWeight:600}}>Done</button>
+                </div>
+              </div>
+            ):(
+              <>
+                <div style={{marginBottom:12}}>
+                  {contactTarget.isPair?(
+                    <div style={{display:"flex",gap:6}}>
+                      {[contactTarget.pairA,contactTarget.pairB].map(r=>(
+                        <div key={r.name} style={{flex:1,padding:"8px 10px",background:"#f8fafc",borderRadius:8,border:"1px solid #f1f5f9"}}>
+                          <div style={{fontSize:11,fontWeight:700,color:"#334155"}}>{r.name}</div>
+                          <div style={{fontSize:9,color:deptColors[r.dept]||"#64748b",fontWeight:600}}>{r.dept}</div>
+                          <div style={{display:"flex",gap:3,marginTop:4,flexWrap:"wrap"}}>{r.sdgs.map(s=><span key={s} style={{fontSize:8,padding:"2px 5px",borderRadius:20,background:SDG_META[s]?.color,color:"white",fontWeight:700}}>SDG {s}</span>)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ):(
+                    <div style={{padding:"8px 10px",background:"#f8fafc",borderRadius:8,border:"1px solid #f1f5f9"}}>
+                      <div style={{fontSize:12,fontWeight:700,color:"#334155"}}>{contactTarget.name}</div>
+                      <div style={{fontSize:10,color:deptColors[contactTarget.dept]||"#64748b",fontWeight:600,marginBottom:4}}>{contactTarget.dept} · {contactTarget.count} papers</div>
+                      <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{contactTarget.sdgs?.map(s=><span key={s} style={{fontSize:9,padding:"2px 7px",borderRadius:20,background:SDG_META[s]?.color,color:"white",fontWeight:700}}>SDG {s}: {SDG_META[s]?.name}</span>)}</div>
+                    </div>
+                  )}
+                </div>
+                <div style={{fontSize:10,fontWeight:700,color:"#334155",marginBottom:6}}>Your message <span style={{color:"#94a3b8",fontWeight:400}}>(optional)</span></div>
+                <textarea value={contactMsg} onChange={e=>setContactMsg(e.target.value)}
+                  placeholder={`Hi ${contactTarget.isPair?contactTarget.pairA.name.split(",")[0]:contactTarget.name.split(",")[0]}, I found your research profile on the Gies Impact Command Center and I'd love to connect about...`}
+                  style={{width:"100%",minHeight:90,fontSize:11,padding:"8px 10px",borderRadius:8,border:"1px solid #e2e8f0",outline:"none",resize:"vertical",color:"#334155",fontFamily:"inherit",boxSizing:"border-box",lineHeight:1.6}}/>
+                <div style={{display:"flex",gap:8,marginTop:12}}>
+                  <button onClick={()=>{setContactTarget(null);setContactMsg("");}} style={{flex:1,fontSize:11,padding:"8px 0",borderRadius:8,background:"#f1f5f9",color:"#64748b",border:"none",cursor:"pointer",fontWeight:600}}>Cancel</button>
+                  <button onClick={()=>setContactSent(true)} style={{flex:2,fontSize:11,padding:"8px 0",borderRadius:8,background:"#0a1628",color:"white",border:"none",cursor:"pointer",fontWeight:700}}>Draft Message →</button>
+                </div>
+                <div style={{fontSize:8,color:"#94a3b8",marginTop:8,textAlign:"center",lineHeight:1.5}}>Faculty contact details available via the <a href="https://experts.illinois.edu/en/organisations/gies-college-of-business" target="_blank" style={{color:"#6366f1"}}>Illinois Experts directory →</a></div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+  );
+}
+
 // ── MAIN APP ──────────────────────────────────────────────────
 function App(){
   const isMobile=useIsMobile();
@@ -772,6 +1058,15 @@ function App(){
   const [expandedRec,setExpandedRec]=useState(null);
   const [chatOpen,setChatOpen]=useState(false);
   const [selectedFaculty,setSelectedFaculty]=useState(null);
+  // Network tab state
+  const [netSearch,setNetSearch]=useState("");
+  const [netSDGFilter,setNetSDGFilter]=useState(null);
+  const [netDeptFilter2,setNetDeptFilter2]=useState(null);
+  const [pairA,setPairA]=useState(null);
+  const [pairB,setPairB]=useState(null);
+  const [contactTarget,setContactTarget]=useState(null);
+  const [contactMsg,setContactMsg]=useState("");
+  const [contactSent,setContactSent]=useState(false);
 
   const toggleSDG=id=>{
     setAiLoading(true);
@@ -1251,102 +1546,16 @@ function App(){
         )}
 
         {/* ═══════════ NETWORK ═══════════ */}
-        {tab==="network"&&(
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            {personaView==="student"&&(
-              <div className="fadein" style={{background:"linear-gradient(135deg,#eef2ff,#e0e7ff)",borderRadius:8,padding:"7px 12px",border:"1px solid #c7d2fe",display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:15}}>🎓</span>
-                <div>
-                  <div style={{fontSize:12,fontWeight:700,color:"#3730a3"}}>Student Research View</div>
-                  <div style={{fontSize:11,color:"#4338ca"}}>Explore researcher profiles and collaboration opportunities.</div>
-                </div>
-              </div>
-            )}
-            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:10}}>
-              <div style={S.card}>
-                <div style={{fontWeight:700,color:"#334155",fontSize:14,marginBottom:1}}>Collaboration Network</div>
-                <p style={{fontSize:11,color:"#94a3b8",marginBottom:8}}>Click a department to see suggested pairings</p>
-                <svg viewBox="0 0 600 320" style={{width:"100%",height:220}}>
-                  {NET_LINKS.map(([a,b],i)=>{const n1=NET_NODES.find(n=>n.dept===a),n2=NET_NODES.find(n=>n.dept===b);return <line key={i} x1={n1.x} y1={n1.y} x2={n2.x} y2={n2.y} stroke="#e2e8f0" strokeWidth="2"/>;
-                  })}
-                  {NET_NODES.map(n=>{
-                    const rad=Math.sqrt(n.c)*1.6+16,isSel=netDept===n.dept;
-                    return (
-                      <g key={n.dept} onClick={()=>{setNetDept(netDept===n.dept?null:n.dept);setSelectedPairing(null);}} style={{cursor:"pointer"}}>
-                        {isSel&&<circle cx={n.x} cy={n.y} r={rad+10} fill="#e85d26" opacity=".10"/>}
-                        <circle cx={n.x} cy={n.y} r={rad} fill={isSel?"#e85d26":"#3b82f6"} stroke="white" strokeWidth="2.5" opacity={netDept&&!isSel ? 0.3 : 1} style={{transition:"all .3s"}}/>
-                        <text x={n.x} y={n.y+1} textAnchor="middle" dominantBaseline="middle" fontSize="12" fill="white" fontWeight="700">{n.c}</text>
-                        <text x={n.x} y={n.y+rad+14} textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="600">{n.dept}</text>
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                <div style={S.card}>
-                  <div style={{fontWeight:700,color:"#334155",fontSize:13,marginBottom:5}}>{netDept?`${netDept} — Pairs`:"Select a Department"}</div>
-                  {netDept&&COLLAB_PAIRS[netDept]?(
-                    <div style={{display:"flex",flexDirection:"column",gap:7}}>
-                      {COLLAB_PAIRS[netDept].map((p,i)=>(
-                        <div key={i} className="fadein" style={{background:selectedPairing===i?"#eff6ff":"#f8fafc",borderRadius:7,padding:9,border:`1px solid ${selectedPairing===i?"#bfdbfe":"#f1f5f9"}`,cursor:"pointer",transition:"all .2s"}} onClick={()=>setSelectedPairing(selectedPairing===i?null:i)}>
-                          <div style={{fontSize:13,fontWeight:700,color:"#334155",marginBottom:2,lineHeight:1.3}}>{p.pair}</div>
-                          <div style={{fontSize:12,color:"#64748b",marginBottom:5}}>{p.outcome}</div>
-                          <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                            <span style={{fontSize:11,padding:"2px 6px",borderRadius:20,background:"#fff7ed",color:"#c2410c",fontWeight:700}}>{p.sdgs}</span>
-                            {p.sharedSdgs.map(s=><span key={s} style={{fontSize:11,padding:"2px 6px",borderRadius:20,background:SDG_META[s]?.color+"20",color:SDG_META[s]?.color,fontWeight:700}}>SDG {s}</span>)}
-                          </div>
-                        </div>
-                      ))}
-                      {selectedPairing!==null&&COLLAB_PAIRS[netDept][selectedPairing]&&<PairingPreview pair={COLLAB_PAIRS[netDept][selectedPairing]}/>}
-                    </div>
-                  ):(<p style={{fontSize:13,color:"#94a3b8",fontStyle:"italic"}}>Click a department node to see pairings.</p>)}
-                </div>
-                <div style={S.card}>
-                  <div style={{fontWeight:700,color:"#334155",fontSize:14,marginBottom:8}}>Pairing Methodology</div>
-                  <div style={{fontSize:12,color:"#475569",lineHeight:1.6,marginBottom:10}}>Collaboration pairings are identified from shared SDG indexing in the dataset. Researchers assigned to the same SDGs by the classification pipeline are surfaced as potential collaborators.</div>
-                  {[{l:"Shared SDG Indexing",desc:"Both researchers indexed to same SDG by FAISS pipeline",c:"#e85d26"},{l:"Department Diversity",desc:"Cross-department pairings flagged for interdisciplinary potential",c:"#3F7E44"},{l:"Paper Volume",desc:"Combined paper count used as proxy for research depth",c:"#0A97D9"}].map(m=>(
-                    <div key={m.l} style={{marginBottom:8,padding:"6px 8px",background:"#f8fafc",borderRadius:6,borderLeft:`3px solid ${m.c}`}}>
-                      <div style={{fontSize:12,fontWeight:700,color:"#334155",marginBottom:1}}>{m.l}</div>
-                      <div style={{fontSize:11,color:"#64748b"}}>{m.desc}</div>
-                    </div>
-                  ))}
-                  <div style={{fontSize:10,color:"#94a3b8",marginTop:4,fontStyle:"italic",lineHeight:1.5}}>No numeric compatibility scores are assigned. Predicting collaboration success requires qualitative assessment beyond bibliometric co-indexing.</div>
-                </div>
-              </div>
-            </div>
-            <div style={S.card}>
-              <div style={{fontWeight:700,color:"#334155",fontSize:14,marginBottom:7}}>All Sustainability Researchers</div>
-              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:6}}>
-                {RESEARCHERS.map(r=>(
-                  <div key={r.name} onClick={()=>setSelectedFaculty(r)} style={{padding:8,background:"#f8fafc",borderRadius:7,border:"1px solid #f1f5f9",cursor:"pointer",transition:"background .15s"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="#eef2f7"}
-                    onMouseLeave={e=>e.currentTarget.style.background="#f8fafc"}>
-                    <div style={{fontWeight:700,color:"#334155",fontSize:12,marginBottom:1}}>{r.name}</div>
-                    <div style={{fontSize:10,color:"#94a3b8",marginBottom:4}}>{r.dept}</div>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                      <span style={{fontSize:16,fontWeight:900,color:"#e85d26"}}>{r.count}</span>
-                      <span style={{fontSize:10,padding:"2px 5px",borderRadius:20,color:"white",fontWeight:700,background:SDG_META[r.topSdg]?.color||"#64748b"}}>SDG {r.topSdg}</span>
-                    </div>
-                    <div style={{fontSize:9,color:"#94a3b8",marginTop:3}}>View profile →</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        {tab==="network"&&<NetworkTab setSelectedFaculty={setSelectedFaculty}/>}
 
         {/* ═══════════ GLOBAL IMPACT ═══════════ */}
         {tab==="globalimpact"&&(
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"3fr 2fr",gap:8}}>
               <div style={S.card}>
-                <div style={{fontWeight:700,color:"#334155",fontSize:14,marginBottom:7}}>Geospatial Research Reach</div>
+                <div style={{fontWeight:700,color:"#334155",fontSize:14,marginBottom:4}}>Research Origin: Gies College of Business, UIUC</div>
+                <div style={{fontSize:9,color:"#94a3b8",marginBottom:8}}>The Illinois Experts dataset covers Gies faculty publications (2010–2020). Geographic co-authorship data is not available in this dataset — country-level breakdowns cannot be accurately derived.</div>
                 <WorldMap/>
-                <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:6}}>
-                  {Object.entries(COUNTRY_DATA).sort((a,b)=>b[1].count-a[1].count).map(([c,d])=>(
-                    <span key={c} style={{fontSize:11,color:"#64748b"}}><strong style={{color:"#334155"}}>{c}</strong> {d.count}</span>
-                  ))}
-                </div>
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 <div style={S.card}>
