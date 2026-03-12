@@ -1,7 +1,6 @@
 # Gies Impact Command Center
 
 **Built by Team Silly Gies** — Agata Fietko, Yuri Chen, Meryem Hassan Rafiq, Yuliia Koreiba, Prateek Verma
-
 Gies College of Business, University of Illinois Urbana-Champaign
 
 Forked from [prattkk11/sustainability-dashboard](https://github.com/prattkk11/sustainability-dashboard) and extended for the Gies Sustainability Case Competition.
@@ -99,7 +98,9 @@ Full methodology is in the dashboard footer and the provenance strip on the Over
 
 ## Design Decisions Worth Noting
 
-**No fabricated researcher data.** Faculty profiles only show what is actually in the dataset: name, department, paper count, SDG assignments, and keywords. Titles, bios, and publication lists were removed.
+**No numeric collaboration scores.** Pairings are presented as data-driven suggestions based on bibliometric co-indexing. Predicting collaboration success from publication data alone is methodologically unsound, so no numeric scores are assigned. Each pairing shows named researchers, shared SDGs, combined paper counts, and a concrete outcome rationale.
+
+**No fabricated researcher data.** Faculty profiles only show what is in the dataset: name, department, paper count, SDG assignments, and keywords from the indexed publications.
 
 **AI transparency.** "AI-assisted" labels refer to deterministic rules-based synthesis only. The assistant does not generate predictions beyond what the data supports.
 
@@ -152,20 +153,17 @@ open index.html
 
 To deploy your own fork: go to **Settings > Pages**, set source to `main` branch at `/ (root)`, and it will be live at `https://<your-username>.github.io/sustainability-dashboard/`.
 
----
-
 ## Changelog
 
 | Version | Changes |
 |---|---|
 | v1.0 | Initial fork from prattkk11 |
 | v1.1 | Collaboration Hub tab with Streamlit embed and gap-to-sponsorship mapping |
-| v1.2 | Hero banner ("Moving from Information to Action.") |
+| v1.2 | Hero banner ("Moving from Information to Action.") with inline data provenance strip |
 | v1.3 | Faculty profile modals with verified dataset-only data |
-| v1.4 | Data provenance strip, inline AI assistant panel, quick-prompt pills |
+| v1.4 | Inline AI assistant panel with auto-surfaced insights and quick-prompt pills |
 | v1.5 | Full visual user journey maps with before/after comparison |
-| v1.5.1 | Removed numeric compatibility scores, added methodology disclaimer |
-| v1.5.2 | Fixed AI chatbot responses to remove fabricated statistics |
+| v1.6 | Removed numeric compatibility scores; added methodology disclaimer in Network tab |
 
 ---
 
