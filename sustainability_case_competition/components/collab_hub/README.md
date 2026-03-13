@@ -163,4 +163,3 @@ This component was merged from the original repository [`meryemrafiq14-hue/susta
 
 ---
 
-## 📧 Contact
