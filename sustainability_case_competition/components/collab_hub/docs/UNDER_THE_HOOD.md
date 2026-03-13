@@ -315,8 +315,8 @@ For each unique researcher (`person_uuid`), the app aggregates their publication
 ### File Loading
 
 The app tries multiple paths to find `publications.csv`:
+- Streamlit Cloud: `/mount/src/sustainability_case_competition/publications.csv` or `/mount/src/sustainability-dashboard/sustainability_case_competition/publications.csv`
 - Repository root: `../../publications.csv` (from `components/collab_hub/`)
-- Streamlit Cloud: `/mount/src/sustainability_case_competition/publications.csv`
 - Current directory fallbacks
 
 ---
@@ -344,6 +344,15 @@ The app generates explanations based on actual scores:
 - **75-89**: "Good career pairing - enables peer collaboration or cross-stage learning"
 - **60-74**: "Moderate career pairing - some collaboration benefits"
 - **0-59**: "Limited career alignment - may not offer strongest mentorship opportunities"
+
+### How to Interpret Overall CCS Values
+
+Because the CCS is built from real publication data and strict NLP similarity, we **do not expect most pairs to score in the 90–100 range**. In practice:
+- Scores in the **60–75** range are **moderate but meaningful matches** – there is real topic overlap, useful method complementarity, and workable career fit.
+- Scores in the **75–90+** range represent **very strong alignment** and are naturally rarer in real data.
+- Scores below **60** usually indicate that the match is driven more by one dimension (for example, method or career) than by overall fit.
+
+This scale is intentional: it reflects realistic collaboration potential rather than inflating every recommendation into a “perfect” match.
 
 ---
 
@@ -424,26 +433,21 @@ This section addresses common questions from judges specifically about the Colla
 
 **See the "Weight Justification" section above for complete details on Professor Fei's interview and our reasoning process.**
 
-### Where did the data come from?
+### Where did the data come from? Is the data real?
 
-All data comes from the **provided publications dataset** (`publications.csv`). No external scraping or data collection was performed. The dataset includes:
+**Yes, absolutely.** All data comes from the **provided publications dataset** (`publications.csv`). No external scraping or data collection was performed. The dataset includes:
 - Author names and departments
 - Publication years
 - Keywords and abstracts
 - SDG labels (1-17)
 - Sustainability flags
 
-The Streamlit app uses **only real data** from this original CSV file. All researcher profiles and matches are built on-the-fly from actual publication records. No simulated or demo data is used.
-
-### Is the data real?
-
-**Yes, absolutely.** The Streamlit app uses only real data from the original publications CSV (`publications.csv`). All researcher profiles and matches are built on-the-fly from actual publication records. No simulated or demo data is used.
-
 **How we ensure data authenticity**:
 - The app loads the original CSV directly from the repository
-- Builds researcher profiles by aggregating their actual publications
-- Performs NLP analysis on real keywords and abstracts from publications
-- Calculates compatibility scores using only real data
+- All researcher profiles and matches are built on-the-fly from actual publication records
+- NLP analysis is performed on real keywords and abstracts from publications
+- Compatibility scores are calculated using only real data
+- **No simulated or demo data is used**
 
 Everything is transparent and reproducible. You can verify this by examining the `app.py` code and the `publications.csv` file.
 
@@ -531,6 +535,7 @@ We found that 45/40/15 best balances research quality (topic + method) with stra
 5. **Network Effects**: Existing collaborations not yet considered
 
 **See the "Limitations & Future Work" section above for detailed discussion.**
+
 
 ---
 
