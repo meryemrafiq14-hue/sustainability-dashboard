@@ -356,18 +356,6 @@ This scale is intentional: it reflects realistic collaboration potential rather 
 
 ---
 
-## 📊 Visual Components
-
-### Gauge Chart
-
-- **Purpose**: Visual representation of match quality
-- **Range**: 0-100
-- **Color Zones**:
-  - 0-40: Light gray (low match)
-  - 40-70: Medium blue (moderate match)
-  - 70-100: Navy blue (strong match)
-- **Bar Color**: Orange (`#E84A27`) matching main site theme
-
 ### Score Breakdown
 
 - **Three-column layout**: Topic, Method, Career scores
