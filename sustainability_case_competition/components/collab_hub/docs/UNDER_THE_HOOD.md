@@ -364,31 +364,6 @@ This scale is intentional: it reflects realistic collaboration potential rather 
 
 ---
 
-## ⚠️ Limitations & Future Work
-
-### Current Limitations
-
-1. **Method Inference**: Simple keyword matching may miss nuance
-2. **SDG Assignment**: Relies on provided labels (may be sparse)
-3. **Career Stage**: Inferred from publication years only
-4. **NLP Model**: Uses general-purpose model, not domain-specific
-5. **Network Effects**: Existing collaborations not yet considered
-
-### Future Improvements
-
-- Validate scoring with faculty feedback and historical collaboration outcomes
-- Improve method inference with richer NLP features
-- Add uncertainty indicators for low-signal profiles
-- Incorporate full abstracts (currently limited to 2000 characters)
-- Enhance with domain-specific NLP models
-- Consider network effects and existing collaboration patterns
-
----
-
-**Note**: This document is the complete technical documentation for the Collaboration Hub. All methodology, limitations, judge Q&A, and technical details are consolidated here.
-
----
-
 ## Frequently Asked Questions
 
 This section addresses common questions from judges specifically about the Collaboration Hub component.
@@ -513,17 +488,30 @@ Yes, the weights are configurable in the code. However, our current weights (45/
 
 We found that 45/40/15 best balances research quality (topic + method) with strategic value (career stage mentorship). See the "Weight Justification" section for complete details.
 
-### What are the limitations?
+---
 
-**Current Limitations**:
-1. **Method Inference**: Simple keyword matching may miss nuanced method distinctions
-2. **SDG Assignment**: Relies on provided labels (may be sparse for some researchers)
-3. **Career Stage**: Inferred from publication years only (doesn't account for career breaks)
+## ⚠️ Limitations & Future Work
+
+### Current Limitations
+
+1. **Method Inference**: Simple keyword matching may miss nuance
+2. **SDG Assignment**: Relies on provided labels (may be sparse)
+3. **Career Stage**: Inferred from publication years only
 4. **NLP Model**: Uses general-purpose model, not domain-specific
 5. **Network Effects**: Existing collaborations not yet considered
 
-**See the "Limitations & Future Work" section above for detailed discussion.**
+### Future Improvements
 
+- Validate scoring with faculty feedback and historical collaboration outcomes
+- Improve method inference with richer NLP features
+- Add uncertainty indicators for low-signal profiles
+- Incorporate full abstracts (currently limited to 2000 characters)
+- Enhance with domain-specific NLP models
+- Consider network effects and existing collaboration patterns
+
+---
+
+**Note**: This document is the complete technical documentation for the Collaboration Hub. All methodology, limitations, judge Q&A, and technical details are consolidated here.
 
 ---
 
