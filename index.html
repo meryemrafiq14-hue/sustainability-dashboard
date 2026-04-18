@@ -1038,6 +1038,9 @@ function NetworkTab({setSelectedFaculty}){
   );
 }
 
+// Streamlit Community Cloud (free tier may cold-start after idle)
+const STREAMLIT_PORTAL_BASE="https://sustainabilitycasecompetition-hmdgpbamcag9wrotla87c4.streamlit.app";
+
 // ── MAIN APP ──────────────────────────────────────────────────
 function App(){
   const isMobile=useIsMobile();
@@ -1067,6 +1070,8 @@ function App(){
   const [contactTarget,setContactTarget]=useState(null);
   const [contactMsg,setContactMsg]=useState("");
   const [contactSent,setContactSent]=useState(false);
+  const [collabEmbed,setCollabEmbed]=useState(false);
+  useEffect(()=>{if(tab!=="collab")setCollabEmbed(false);},[tab]);
 
   const toggleSDG=id=>{
     setAiLoading(true);
@@ -1652,7 +1657,7 @@ function App(){
                   Powered by the <strong>Sustainability Case Competition</strong> portal.
                 </p>
               </div>
-              <a href="https://sustainabilitycasecompetition-hmdgpbamcag9wrotla87c4.streamlit.app/#sponsor-a-priority"
+              <a href={`${STREAMLIT_PORTAL_BASE}/#sponsor-a-priority`}
                 target="_blank" rel="noopener noreferrer"
                 style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 16px",borderRadius:8,background:"#0a1628",color:"white",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>
                 Open full screen ↗
@@ -1668,7 +1673,7 @@ function App(){
                 {label:"Case Competition",anchor:"#case-competition",color:"#6366f1"},
               ].map(p=>(
                 <a key={p.label}
-                  href={`https://sustainabilitycasecompetition-hmdgpbamcag9wrotla87c4.streamlit.app/${p.anchor}`}
+                  href={`${STREAMLIT_PORTAL_BASE}/${p.anchor}`}
                   target="_blank" rel="noopener noreferrer"
                   style={{fontSize:12,fontWeight:600,padding:"5px 13px",borderRadius:20,color:"white",background:p.color}}>
                   {p.label}
@@ -1680,15 +1685,14 @@ function App(){
             <div style={{background:"linear-gradient(135deg,#eff6ff,#dbeafe)",borderRadius:8,padding:"8px 14px",border:"1px solid #bfdbfe",display:"flex",alignItems:"flex-start",gap:10}}>
               <span style={{fontSize:16,flexShrink:0}}>🔗</span>
               <div style={{fontSize:12,color:"#1e40af",lineHeight:1.6}}>
-                <strong>How this connects:</strong> The portal below surfaces SDG sponsorship priorities sourced from the same gap analysis powering this dashboard.
+                <strong>How this connects:</strong> The portal (open in a new tab, or load embedded below) surfaces SDG sponsorship priorities sourced from the same gap analysis powering this dashboard.
                 Gies under-indexed SDGs (SDG 14, 15, 2) map directly to open sponsorship tracks.
                 Use the <strong>Overview tab</strong> to identify gaps, then come here to match them with funding opportunities.
               </div>
             </div>
 
-            {/* Iframe embed */}
+            {/* Portal: lazy embed avoids waking Streamlit until the user asks */}
             <div style={{...S.card,padding:0,overflow:"hidden"}}>
-              {/* Browser-chrome bar */}
               <div style={{background:"#0a1628",padding:"8px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <div style={{display:"flex",gap:5}}>
@@ -1699,17 +1703,48 @@ function App(){
                   <span style={{color:"#64748b",fontSize:12,marginLeft:6,fontFamily:"monospace"}}>sustainabilitycasecompetition · streamlit.app</span>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
-                  <div className="pulse-dot" style={{width:5,height:5,borderRadius:"50%",background:"#4ade80"}}/>
-                  <span style={{color:"#4ade80",fontSize:11,fontWeight:600}}>Live</span>
+                  {collabEmbed?(
+                    <><div className="pulse-dot" style={{width:5,height:5,borderRadius:"50%",background:"#4ade80"}}/>
+                    <span style={{color:"#4ade80",fontSize:11,fontWeight:600}}>Embedded</span></>
+                  ):(
+                    <span style={{color:"#fbbf24",fontSize:11,fontWeight:600}}>Embed off — dashboard stays instant</span>
+                  )}
                 </div>
               </div>
-              <iframe
-                src="https://sustainabilitycasecompetition-hmdgpbamcag9wrotla87c4.streamlit.app/?embed=true"
-                style={{width:"100%",height:720,border:"none",display:"block"}}
-                title="Sustainability Case Competition Portal"
-                allow="clipboard-write"
-                loading="lazy"
-              />
+              {!collabEmbed?(
+                <div style={{padding:18,background:"#fafafa",borderTop:"1px solid #e2e8f0"}}>
+                  <p style={{fontSize:13,color:"#334155",lineHeight:1.65,margin:"0 0 14px 0"}}>
+                    This portal is hosted on Streamlit Community Cloud. On the free tier the app can spin down after a period without visitors, so the next visit may show a loading screen for up to about a minute.
+                    <strong style={{display:"block",marginTop:10}}>Tip:</strong> opening in a new tab is usually faster and more stable than the embedded view.
+                  </p>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:10,alignItems:"center"}}>
+                    <a href={`${STREAMLIT_PORTAL_BASE}/`}
+                      target="_blank" rel="noopener noreferrer"
+                      style={{display:"inline-flex",alignItems:"center",gap:6,padding:"10px 18px",borderRadius:8,background:"#0a1628",color:"white",fontSize:13,fontWeight:700}}>
+                      Open portal in new tab ↗
+                    </a>
+                    <button type="button" onClick={()=>setCollabEmbed(true)}
+                      style={{padding:"10px 18px",borderRadius:8,border:"1px solid #cbd5e1",background:"white",cursor:"pointer",fontSize:13,fontWeight:600,color:"#0f172a"}}>
+                      Load embedded portal
+                    </button>
+                  </div>
+                </div>
+              ):(
+                <>
+                  <iframe
+                    src={`${STREAMLIT_PORTAL_BASE}/?embed=true`}
+                    style={{width:"100%",height:720,border:"none",display:"block"}}
+                    title="Sustainability Case Competition Portal"
+                    allow="clipboard-write"
+                  />
+                  <div style={{padding:10,textAlign:"center",borderTop:"1px solid #e2e8f0",background:"#f8fafc"}}>
+                    <button type="button" onClick={()=>setCollabEmbed(false)}
+                      style={{padding:"8px 16px",borderRadius:8,border:"1px solid #cbd5e1",background:"white",cursor:"pointer",fontSize:12,fontWeight:600,color:"#475569"}}>
+                      Unload embedded view
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Context cards */}
