@@ -1070,6 +1070,17 @@ function App(){
   const [contactTarget,setContactTarget]=useState(null);
   const [contactMsg,setContactMsg]=useState("");
   const [contactSent,setContactSent]=useState(false);
+
+  // Pre-warm Streamlit while users are on other tabs.
+  // This cannot remove Cloud cold-starts entirely, but it often reduces wait
+  // when users open Collaboration Hub.
+  useEffect(()=>{
+    const wake = ()=>fetch(`${STREAMLIT_PORTAL_BASE}/?embed=true`, {mode:"no-cors"}).catch(()=>{});
+    wake();
+    const id=setInterval(wake, 240000);
+    return ()=>clearInterval(id);
+  },[]);
+
   const toggleSDG=id=>{
     setAiLoading(true);
     setSelSDGs(p=>p.includes(id)?p.filter(x=>x!==id):[id]);
